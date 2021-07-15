@@ -45,14 +45,14 @@ void token_print_notes();
 void choose_token(char choice[10] , struct tile *head , int round_part);
 void rotation(struct tile* head);
 void toby();
-void toby1(int Toby);
-void toby2(int Toby);
+int toby1(int Toby);
+int toby2(int Toby);
 void watson();
-void watson1(int Watson);
-void watson2(int Watson);
+int watson1(int Watson);
+int watson2(int Watson);
 void sherlock();
-void sherlock1(int sherlock);
-void sherlock2(int sherlock);
+int sherlock1(int sherlock);
+int sherlock2(int sherlock);
 int main() {
     start_game_menu();
     return 0;
@@ -186,43 +186,64 @@ void new_game_menu() {
         Watson = 5;
         Sherlock = 4;
     }
-    printf("Toby : %d\nWatson : %d\nSherlock : %d\n", Toby, Watson, Sherlock);
+    detectives_places();
+    printf("if you are ready , pls enter a character to start the game!\n");
+    char start_char;
+    getchar();
+    scanf("%c" , &start_char);
     char choice[10];
     int round_part; //an integer between 0 & 1
     for (game_round = 1; game_round < 9; game_round++) {
         round_part = 0;
         printf("-%dth ROUND-\n", game_round);
-        printf("- - - - - - - - - - - - - - -\n");
-        token1();
         if (game_round % 2 == 0)
-            printf("so , Mr.jack! pls choose one token and enter its name as a string : \n");
+            token2();
         if (game_round % 2 == 1)
-            printf("so , Detective! pls choose one token and enter its name as a string : \n");
+            token1();
+        if (game_round % 2 == 0)
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+        if (game_round % 2 == 1)
+            printf("Detective! pls choose one token and enter its name as a string : \n");
         scanf("%s", choice);
         choose_token(choice , head , round_part);
-        printf("- - - - - - - - - - - - - - -\n");
+        detectives_places();
         //////////////
         if (game_round % 2 == 0)
-            printf("so , Detective! pls choose one token and enter its name as a string : \n");
+            token2();
         if (game_round % 2 == 1)
-            printf("so , Mr.jack! pls choose one token and enter its name as a string : \n");
+            token1();
+        if (game_round % 2 == 0)
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+        if (game_round % 2 == 1)
+            printf("Detective! pls choose one token and enter its name as a string : \n");
         scanf("%s", choice);
         choose_token(choice , head , round_part);
+        detectives_places();
         /////////////
         round_part = 1;
         if (game_round % 2 == 0)
-            printf("so , Detective! pls choose one token and enter its name as a string : \n");
+            token2();
         if (game_round % 2 == 1)
-            printf("so , Mr.jack! pls choose one token and enter its name as a string : \n");
+            token1();
+        if (game_round % 2 == 0)
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+        if (game_round % 2 == 1)
+            printf("Detective! pls choose one token and enter its name as a string : \n");
         scanf("%s", choice);
         choose_token(choice , head , round_part);
+        detectives_places();
         //////////
         if (game_round % 2 == 0)
-            printf("so , Mr.jack! pls choose one token and enter its name as a string : \n");
+            token2();
         if (game_round % 2 == 1)
-            printf("so , Detective! pls choose one token and enter its name as a string : \n");
+            token1();
+        if (game_round % 2 == 0)
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+        if (game_round % 2 == 1)
+            printf("Detective! pls choose one token and enter its name as a string : \n");
         scanf("%s", choice);
         choose_token(choice , head , round_part);
+        detectives_places();
         printf("- - - - - - - - - - - - - - -\n");
 
 //    fclose(write);
@@ -264,6 +285,7 @@ void add_tile(struct tile** head_ref, char tile_info[3] ,int row ,int column)
     }
 void printmap(struct tile *head)
 {
+    printf("- - - - - - - - - - - - - - -\n");
     struct tile *current;
     current = head;
     int margin_count = 1;
@@ -294,10 +316,11 @@ void printmap(struct tile *head)
         }
         printf("\n");
     }
+    printf("- - - - - - - - - - - - - - -\n");
 }
 void detectives_places()
 {
-
+    printf("Toby : %d\nWatson : %d\nSherlock : %d\n", Toby, Watson, Sherlock);
 }
 void token1()
 {
@@ -333,7 +356,7 @@ void token2()
 }
 void token_print_notes(int r)
 {
-    printf("!!TOKENS!!\n- - - - - - - - - - - - - - -\n");
+    printf("- - - - - - - - - - - - - - -\n!!TOKENS!!\n- - - - - - - - - - - - - - -\n");
     if(tokens[r].rotation_joker == 0)
         printf("1 : ROTATION\nnote : you can rotate one tile to each side that you want\n");
     if(tokens[r].rotation_joker == 1)
@@ -367,7 +390,7 @@ void choose_token(char choice[10] , struct tile *head ,int round_part)
     if(strcmpi(choice , "sherlock") == 0)
         sherlock();
 //    if(strcmpi(choice , "exchange") == 0)
-//        exchange();
+//        exchange(head);
 //    if(strcmpi(choice , "alibi") == 0)
 //        alibi();
 }
@@ -398,47 +421,47 @@ void toby()
         scanf("%d" , &toby_blocks);
     if (toby_blocks == 1)
     {
-        toby1(Toby);
+        Toby = toby1(Toby);
     }
     if (toby_blocks == 2)
     {
-        toby2(Toby);
+        Toby=toby2(Toby);
     }
 }
-void toby1(int Toby)
+int toby1(int Toby)
 {
     switch (Toby)
     {
-        case 1:   Toby = 2;
-        case 2:   Toby = 3;
-        case 3:   Toby = 5;
-        case 4:   Toby = 1;
-        case 5:   Toby = 7;
-        case 6:   Toby = 4;
-        case 7:   Toby = 9;
-        case 8:   Toby = 6;
-        case 9:   Toby = 12;
-        case 10:   Toby = 8;
-        case 11:   Toby = 10;
-        case 12:   Toby = 11;
+        case 1:   return 2;
+        case 2:   return 3;
+        case 3:   return 5;
+        case 4:   return 1;
+        case 5:   return 7;
+        case 6:   return 4;
+        case 7:   return 9;
+        case 8:   return 6;
+        case 9:   return 12;
+        case 10:   return 8;
+        case 11:   return 10;
+        case 12:   return 11;
     }
 }
-void toby2(int Toby)
+int toby2(int Toby)
 {
     switch (Toby)
     {
-        case 1:   Toby = 3;
-        case 2:   Toby = 5;
-        case 3:   Toby = 7;
-        case 4:   Toby = 2;
-        case 5:   Toby = 9;
-        case 6:   Toby = 1;
-        case 7:   Toby = 12;
-        case 8:   Toby = 4;
-        case 9:   Toby = 11;
-        case 10:   Toby = 6;
-        case 11:   Toby = 8;
-        case 12:   Toby = 10;
+        case 1:   return 3;
+        case 2:   return 5;
+        case 3:   return 7;
+        case 4:   return 2;
+        case 5:   return 9;
+        case 6:   return 1;
+        case 7:   return 12;
+        case 8:   return 4;
+        case 9:   return 11;
+        case 10:   return 6;
+        case 11:   return 8;
+        case 12:   return 10;
     }
 }
 void watson()
@@ -448,47 +471,47 @@ void watson()
     scanf("%d" , &watson_blocks);
     if (watson_blocks == 1)
     {
-        watson1(Watson);
+        Watson= watson1(Watson);
     }
     if (watson_blocks == 2)
     {
-        watson2(Watson);
+        Watson=watson2(Watson);
     }
 }
-void watson1(int Watson)
+int watson1(int Watson)
 {
     switch (Watson)
     {
-        case 1:   Watson = 2;
-        case 2:   Watson = 3;
-        case 3:   Watson = 5;
-        case 4:   Watson = 1;
-        case 5:   Watson = 7;
-        case 6:   Watson = 4;
-        case 7:   Watson = 9;
-        case 8:   Watson = 6;
-        case 9:   Watson = 12;
-        case 10:   Watson = 8;
-        case 11:   Watson = 10;
-        case 12:   Watson = 11;
+        case 1:   return 2;
+        case 2:   return 3;
+        case 3:   return 5;
+        case 4:   return 1;
+        case 5:   return 7;
+        case 6:   return 4;
+        case 7:   return 9;
+        case 8:   return 6;
+        case 9:   return 12;
+        case 10:   return 8;
+        case 11:   return 10;
+        case 12:   return 11;
     }
 }
-void watson2(int Watson)
+int watson2(int Watson)
 {
     switch (Watson)
     {
-        case 1:   Watson = 3;
-        case 2:   Watson = 5;
-        case 3:   Watson = 7;
-        case 4:   Watson = 2;
-        case 5:   Watson = 9;
-        case 6:   Watson = 1;
-        case 7:   Watson = 12;
-        case 8:   Watson = 4;
-        case 9:   Watson = 11;
-        case 10:   Watson = 6;
-        case 11:   Watson = 8;
-        case 12:   Watson = 10;
+        case 1:   return 3;
+        case 2:   return 5;
+        case 3:   return 7;
+        case 4:   return 2;
+        case 5:   return 9;
+        case 6:   return 1;
+        case 7:   return 12;
+        case 8:   return 4;
+        case 9:   return 11;
+        case 10:   return 6;
+        case 11:   return 8;
+        case 12:   return 10;
     }
 }
 void sherlock()
@@ -498,46 +521,46 @@ void sherlock()
     scanf("%d" , &sherlock_blocks);
     if (sherlock_blocks == 1)
     {
-        sherlock1(Sherlock);
+        Sherlock=sherlock1(Sherlock);
     }
     if (sherlock_blocks == 2)
     {
-        sherlock2(Sherlock);
+        Sherlock=sherlock2(Sherlock);
     }
 }
-void sherlock1(int Sherlock)
+int sherlock1(int Sherlock)
 {
     switch (Sherlock)
     {
-        case 1:   Sherlock = 2;
-        case 2:   Sherlock = 3;
-        case 3:   Sherlock = 5;
-        case 4:   Sherlock = 1;
-        case 5:   Sherlock = 7;
-        case 6:   Sherlock = 4;
-        case 7:   Sherlock = 9;
-        case 8:   Sherlock = 6;
-        case 9:   Sherlock = 12;
-        case 10:   Sherlock = 8;
-        case 11:   Sherlock = 10;
-        case 12:   Sherlock = 11;
+        case 1:   return 2;
+        case 2:   return 3;
+        case 3:   return 5;
+        case 4:   return 1;
+        case 5:   return 7;
+        case 6:   return 4;
+        case 7:   return 9;
+        case 8:   return 6;
+        case 9:   return 12;
+        case 10:   return 8;
+        case 11:   return 10;
+        case 12:   return 11;
     }
 }
-void sherlock2(int Sherlock)
+int sherlock2(int Sherlock)
 {
     switch (Sherlock)
     {
-        case 1:   Sherlock = 3;
-        case 2:   Sherlock = 5;
-        case 3:   Sherlock = 7;
-        case 4:   Sherlock = 2;
-        case 5:   Sherlock = 9;
-        case 6:   Sherlock = 1;
-        case 7:   Sherlock = 12;
-        case 8:   Sherlock = 4;
-        case 9:   Sherlock = 11;
-        case 10:   Sherlock = 6;
-        case 11:   Sherlock = 8;
-        case 12:   Sherlock = 10;
+        case 1:   return 3;
+        case 2:   return 5;
+        case 3:   return 7;
+        case 4:   return 2;
+        case 5:   return 9;
+        case 6:   return 1;
+        case 7:   return 12;
+        case 8:   return 4;
+        case 9:   return 11;
+        case 10:   return 6;
+        case 11:   return 8;
+        case 12:   return 10;
     }
 }
