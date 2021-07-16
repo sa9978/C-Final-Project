@@ -18,13 +18,15 @@ struct tile{
     int status; // this parameter shows the tile is on the front side or not  ... 1 front 0 back
     int is_jack; //this parameter shows the is jack or not ... jack1 innocent0
     int number; //just a number between 1 & 9 , but unique for each tile
+    int hour; // count hourglasses
+    int alibi_status; //shows that the card can be in alibi token1 or not0
 };
 struct action_tokens{
     int rotation_joker;// 0 : rotation , 1 : joker
     int rotation_exchange; // 0 : rotation , 1 : exchange
     int toby_watson; // 0 : toby , 1 : watson
     int sherlock_alibi; // 0 : sherlock , 1 : alibi
-};
+};struct action_tokens tokens;
 struct t
 {
     struct t *next;
@@ -35,8 +37,7 @@ int rotation_joker_status; //0 for didnt printed
 int rotation_exchange_status;
 int toby_watson_status;
 int sherlock_alibi_status;
-struct action_tokens tokens[17]; //two side for each round(2*8) + 1
-int glasshour = 0;
+int hourglass = 0;
 int start_key;
 int game_round = 0;
 int Toby; //8*2 rounds + 1  for first situation + 1
@@ -51,12 +52,12 @@ void start_game_menu();
 void new_game_menu();
 void random_tiles_at_first_time();
 void printmap(struct tile *head);
-void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co , int added_tile_count);
+void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co , int added_tile_count , int h);
 void detectives_places();
 void token1();
 void token2();
 void token_print_notes();
-void choose_token(char choice[10] , struct tile *head , int round_part);
+void choose_token(struct tile *head);
 void rotation(struct tile* head);
 void toby();
 int toby1(int Toby);
@@ -170,28 +171,47 @@ void new_game_menu() {
     int added_tiles_count = 0;
     struct tile *head = NULL;
     char tile_info[3];
+    int h;
     for (int i = 1; i <= 3; i++) {
         for (int j = 1; j <= 3; j++) {
             int info = tiles_array_check_repitition[added_tiles_count];
-            if (info == 1)
+            if (info == 1) {
                 strcpy(tile_info, "IL");
-            if (info == 2)
+                h = 0;
+            }
+            if (info == 2) {
                 strcpy(tile_info, "JB");
-            if (info == 3)
+                h = 1;
+            }
+            if (info == 3) {
                 strcpy(tile_info, "JP");
-            if (info == 4)
+                h = 1;
+            }
+            if (info == 4) {
                 strcpy(tile_info, "JS");
-            if (info == 5)
+                h = 1;
+            }
+            if (info == 5) {
                 strcpy(tile_info, "JL");
-            if (info == 6)
+                h = 1;
+            }
+            if (info == 6) {
                 strcpy(tile_info, "MA");
-            if (info == 7)
+                h = 2;
+            }
+            if (info == 7) {
                 strcpy(tile_info, "MS");
-            if (info == 8)
+                h = 1;
+            }
+            if (info == 8) {
                 strcpy(tile_info, "SG");
-            if (info == 9)
+                h = 0;
+            }
+            if (info == 9) {
                 strcpy(tile_info, "WG");
-            add_tile(&head, tile_info, i, j , added_tiles_count);
+                h = 1;
+            }
+            add_tile(&head, tile_info, i, j , added_tiles_count , h);
 //            printf("%s , i = %d, j = %d\n" , tile_info , i , j);
             added_tiles_count++;
         }
@@ -208,7 +228,7 @@ void new_game_menu() {
         Sherlock = 4;
     }
     printmap(head);
-//    detectives_places();
+
     printf("if you are ready , pls enter a character to start the game!\n");
     char start_char;
     getchar();
@@ -221,10 +241,12 @@ void new_game_menu() {
         sherlock_alibi_status = 0;
         toby_watson_status = 0;
         printf("- - - - - - - - - - - - - - -\n-%dth ROUND-\n- - - - - - - - - - - - - - -\n", game_round);
-        if (game_round % 2 == 0)
+        if (game_round % 2 == 0) {
             token2();
-        if (game_round % 2 == 1)
+        }
+        if (game_round % 2 == 1) {
             token1();
+        }
         if (game_round % 2 == 0) {
             printf("Mr.jack! pls choose one token and enter its name as a string : \n");
             turn = 1;
@@ -233,15 +255,10 @@ void new_game_menu() {
             printf("Detective! pls choose one token and enter its name as a string : \n");
             turn = 0;
         }
-        scanf("%s", choice);
-        choose_token(choice , head , round_part);
+        choose_token( head );
         printmap(head);
-//        detectives_places();
-        //////////////
-        if (game_round % 2 == 0)
-            token2();
-        if (game_round % 2 == 1)
-            token1();
+        ////////////
+        token_print_notes();
         if (game_round % 2 == 0) {
             printf("Detective! pls choose one token and enter its name as a string : \n");
             turn = 0;
@@ -250,15 +267,10 @@ void new_game_menu() {
             printf("Mr.jack! pls choose one token and enter its name as a string : \n");
             turn = 1;
         }
-        scanf("%s", choice);
-        choose_token(choice , head , round_part);
-//        detectives_places();
+        choose_token( head );
         printmap(head);
         /////////////
-        if (game_round % 2 == 0)
-            token2();
-        if (game_round % 2 == 1)
-            token1();
+        token_print_notes();
         if (game_round % 2 == 0) {
             printf("Detective! pls choose one token and enter its name as a string : \n");
             turn = 0;
@@ -268,15 +280,10 @@ void new_game_menu() {
             printf("Mr.jack! pls choose one token and enter its name as a string : \n");
             turn = 1;
         }
-        scanf("%s", choice);
-        choose_token(choice , head , round_part);
-//        detectives_places();
+        choose_token( head );
         printmap(head);
         //////////
-        if (game_round % 2 == 0)
-            token2();
-        if (game_round % 2 == 1)
-            token1();
+        token_print_notes();
         if (game_round % 2 == 0) {
             printf("Mr.jack! pls choose one token and enter its name as a string : \n");
             turn = 1;
@@ -285,9 +292,7 @@ void new_game_menu() {
             printf("Detective! pls choose one token and enter its name as a string : \n");
             turn = 0;
         }
-        scanf("%s", choice);
-        choose_token(choice , head , round_part);
-//        detectives_places();
+        choose_token( head );
         printmap(head);
         printf("- - - - - - - - - - - - - - -\n");
 
@@ -314,7 +319,7 @@ void random_tiles_at_first_time()
 //        printf("%d\t" , tiles_array_check_repitition[i]);
 //    printf("\n");
 }
-void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co ,int added_tile_count)
+void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co ,int added_tile_count ,int h)
 {
     struct tile* nn = (struct tile*) malloc(sizeof(struct tile));
     struct tile *last = *head_ref;
@@ -325,6 +330,8 @@ void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co ,int add
     nn->column = co;
     nn->status = 1;
     nn->number = added_tile_count;
+    nn->hour = h;
+    nn->alibi_status = 1;
     nn->next = NULL;
     if (*head_ref == NULL)
     {
@@ -409,105 +416,110 @@ void printmap(struct tile *head) {
     }
     printf("- - - - - - - - - - - - - - -\n");
 }
-//void detectives_places()
-//{
-//    printf("Toby : %d\nWatson : %d\nSherlock : %d\n", Toby, Watson, Sherlock);
-//}
 void token1()
 {
-    tokens[2 * game_round - 1].rotation_joker = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
-    tokens[2 * game_round - 1].rotation_exchange = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
-    tokens[2 * game_round - 1].toby_watson = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
-    tokens[2 * game_round - 1].sherlock_alibi = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
-    token_print_notes(2 * game_round - 1);
+    tokens.rotation_joker = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
+    tokens.rotation_exchange = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
+    tokens.toby_watson = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
+    tokens.sherlock_alibi = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
+    token_print_notes();
 
 }
 void token2()
 {
-    if(tokens[2 * game_round - 1].rotation_joker == 0)
-        tokens[2 * game_round].rotation_joker = 1;
-    if(tokens[2 * game_round - 1].rotation_joker == 1)
-        tokens[2 * game_round].rotation_joker = 0;
+    if(tokens.rotation_joker == 0)
+        tokens.rotation_joker = 1;
+    else if(tokens.rotation_joker == 1)
+        tokens.rotation_joker = 0;
 
-    if(tokens[2 * game_round - 1].rotation_exchange == 0)
-        tokens[2 * game_round].rotation_exchange = 1;
-    if(tokens[2 * game_round - 1].rotation_exchange == 1)
-        tokens[2 * game_round].rotation_exchange = 0;
+    if(tokens.rotation_exchange == 0)
+        tokens.rotation_exchange = 1;
+    else if(tokens.rotation_exchange == 1)
+        tokens.rotation_exchange = 0;
 
-    if(tokens[2 * game_round - 1].toby_watson == 0)
-        tokens[2 * game_round].toby_watson = 1;
-    if(tokens[2 * game_round - 1].toby_watson == 1)
-        tokens[2 * game_round].toby_watson = 0;
+    if(tokens.toby_watson == 0)
+        tokens.toby_watson = 1;
+    else if(tokens.toby_watson == 1)
+        tokens.toby_watson = 0;
 
-    if(tokens[2 * game_round - 1].sherlock_alibi == 0)
-        tokens[2 * game_round].sherlock_alibi = 1;
-    if(tokens[2 * game_round - 1].sherlock_alibi == 1)
-        tokens[2 * game_round].sherlock_alibi = 0;
-    token_print_notes(2 * game_round);
+    if(tokens.sherlock_alibi == 0)
+        tokens.sherlock_alibi = 1;
+    else if(tokens.sherlock_alibi == 1)
+        tokens.sherlock_alibi = 0;
+    token_print_notes();
 }
-void token_print_notes(int r)
+void token_print_notes()
 {
     printf("- - - - - - - - - - - - - - -\n!!TOKENS!!\n- - - - - - - - - - - - - - -\n");
-    if(tokens[r].rotation_joker == 0 && rotation_joker_status == 0)
+    if(tokens.rotation_joker == 0 && rotation_joker_status == 0)
         printf("1 : ROTATION1\nnote : you can rotate one tile to each side that you want\n");
-    if(tokens[r].rotation_joker == 1 && rotation_joker_status == 0)
+    if(tokens.rotation_joker == 1 && rotation_joker_status == 0)
         printf("1 : JOKER\nnote : you can move one of the detectives for one block\n");
 
-    if(tokens[r].rotation_exchange == 0 && rotation_exchange_status == 0)
+    if(tokens.rotation_exchange == 0 && rotation_exchange_status == 0)
         printf("2 : ROTATION2\nnote : you can rotate one tile to each side that you want\n");
-    if(tokens[r].rotation_exchange == 1 && rotation_exchange_status == 0)
+    if(tokens.rotation_exchange == 1 && rotation_exchange_status == 0)
         printf("2 : EXCHANGE\nnote : you can change two tiles\n");
 
-    if(tokens[r].toby_watson == 0 && toby_watson_status == 0)
+    if(tokens.toby_watson == 0 && toby_watson_status == 0)
         printf("3 : TOBY\nnote : you can move Toby for one or two blocks\n");
-    if(tokens[r].toby_watson == 1 && toby_watson_status == 0)
+    if(tokens.toby_watson == 1 && toby_watson_status == 0)
         printf("3 : WATSON\nnote : you can move Watson for one or two blocks\n");
 
-    if(tokens[r].sherlock_alibi == 0 && sherlock_alibi_status == 0)
+    if(tokens.sherlock_alibi == 0 && sherlock_alibi_status == 0)
         printf("4 : SHERLOCK\nnote : you can move Sherlock for one or two blocks\n");
-    if(tokens[r].sherlock_alibi == 1 && sherlock_alibi_status == 0)
+    if(tokens.sherlock_alibi == 1 && sherlock_alibi_status == 0)
         printf("4 : ALIBI\nnote : you can choose one of suspects cards\n");
 }
-void choose_token(char choice[10] , struct tile *head ,int round_part)
+void choose_token(struct tile *head)
 {
-    if(strcmpi(choice , "rotation1") == 0)
-    {
-        rotation(head);
-        rotation_exchange_status = 1;
-    }
-    if(strcmpi(choice , "rotation2") == 0)
-    {
-        rotation(head);
-        rotation_joker_status = 1;
-    }
-    if(strcmpi(choice , "joker") == 0)
-    {
-        joker();
-        rotation_joker_status = 1;
-    }
-    if(strcmpi(choice , "toby") == 0) {
-        toby();
-        toby_watson_status = 1;
-    }
-    if(strcmpi(choice , "watson") == 0) {
-        watson();
-        toby_watson_status = 1;
-    }
-    if(strcmpi(choice , "sherlock") == 0) {
-        sherlock();
-        sherlock_alibi_status=1;
-    }
-    if(strcmpi(choice , "exchange") == 0)
-    {
-        head = exchange(head);
-        rotation_exchange_status = 1;
-
-    }
-    if(strcmpi(choice , "alibi") == 0)
-    {
-        alibi(head , turn);
-        sherlock_alibi_status = 1;
-    }
+    char choice[10] ;
+    int flag = 0;
+    do {
+        scanf("%s" , choice);
+        if (strcmpi(choice, "rotation1") == 0) {
+            rotation(head);
+            rotation_joker_status = 1;
+            flag = 1;
+        }
+        if (strcmpi(choice, "rotation2") == 0) {
+            rotation(head);
+            rotation_exchange_status = 1;
+            flag = 1;
+        }
+        if (strcmpi(choice, "joker") == 0) {
+            joker();
+            rotation_joker_status = 1;
+            flag = 1;
+        }
+        if (strcmpi(choice, "toby") == 0) {
+            toby();
+            toby_watson_status = 1;
+            flag = 1;
+        }
+        if (strcmpi(choice, "watson") == 0) {
+            watson();
+            toby_watson_status = 1;
+            flag = 1;
+        }
+        if (strcmpi(choice, "sherlock") == 0) {
+            sherlock();
+            sherlock_alibi_status = 1;
+            flag = 1;
+        }
+        if (strcmpi(choice, "exchange") == 0) {
+            head = exchange(head);
+            rotation_exchange_status = 1;
+            flag = 1;
+        }
+        if (strcmpi(choice, "alibi") == 0) {
+            alibi(head, turn);
+            sherlock_alibi_status = 1;
+            flag = 1;
+        }
+        if (flag == 0)
+            printf("pls enter a valid string!\n");
+    } while (flag == 0);
 }
 void rotation(struct tile* head)
 {
@@ -527,7 +539,6 @@ void rotation(struct tile* head)
         current->end = right;
     if(strcmpi(dir , "left") == 0)
         current->end = left;
-    printmap(head);
 }
 void toby()
 {
@@ -744,8 +755,19 @@ void alibi(struct tile* head , int turn)
         do {
             r = rand()%(9 - 1 + 1) + 1;
             for (current = head ; current!= NULL && current->number != r ; current = current->next );
-        } while (current->is_jack == 1 || current->status == 0);
+        } while (current->is_jack == 1 || current->status == 0 || current->alibi_status ==0);
+        printf("%s is reversed\n" , current->tile_name);
+        current->status = 0;
+        current->alibi_status = 0;
     }
-    printf("%s is reversed\n" , current->tile_name);
-    current->status = 0;
+    if(turn == 1)
+    {
+        do {
+            r = rand()%(9 - 1 + 1) + 1;
+            for (current = head ; current!= NULL && current->number != r ; current = current->next );
+        } while (current->is_jack == 1 || current->status == 0 || current->alibi_status == 0 );
+        hourglass = hourglass + current->hour;
+        printf("--hourglasses are updated!--\n");
+        current->alibi_status = 0;
+    }
 }
