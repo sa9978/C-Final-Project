@@ -2,6 +2,11 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
+// ** *1 *2 *3 **
+// *4 11 12 13 *5
+// *6 21 22 23 *7
+// *8 31 32 33 *9
+// ** 10 11 12 **
 //enum tile_name{InspLestrade = 1 , JeremyBert , JohnPizer , JohnSmith , JosephLane , Madame , MissStealthy , SgtGoodley , WiliamGull}; // from 1 to 9
 enum tile_street{up = 1 , right , down , left};
 FILE *write;
@@ -20,6 +25,7 @@ struct tile{
     int number; //just a number between 1 & 9 , but unique for each tile
     int hour; // count hourglasses
     int alibi_status; //shows that the card can be in alibi token1 or not0
+    int det_vision; //1 shows that det.s maybe see him
 };
 struct action_tokens{
     int rotation_joker;// 0 : rotation , 1 : joker
@@ -71,6 +77,12 @@ int sherlock2(int sherlock);
 void joker();
 struct tile* exchange(struct tile *head);
 void alibi(struct tile* head , int turn);
+int detectives_vision(struct tile *head , int location);
+int toby_vision(struct tile *head);
+int watson_vision(struct tile *head);
+int sherlock_vision(struct tile *head);
+void can_see(struct tile *head);
+void rotate_tile(struct tile *head , int location);
 int main() {
     start_game_menu();
     return 0;
@@ -241,61 +253,61 @@ void new_game_menu() {
         sherlock_alibi_status = 0;
         toby_watson_status = 0;
         printf("- - - - - - - - - - - - - - -\n-%dth ROUND-\n- - - - - - - - - - - - - - -\n", game_round);
-        if (game_round % 2 == 0) {
-            token2();
-        }
-        if (game_round % 2 == 1) {
-            token1();
-        }
-        if (game_round % 2 == 0) {
-            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-            turn = 1;
-        }
-        if (game_round % 2 == 1) {
-            printf("Detective! pls choose one token and enter its name as a string : \n");
-            turn = 0;
-        }
-        choose_token( head );
-        printmap(head);
-        ////////////
-        token_print_notes();
-        if (game_round % 2 == 0) {
-            printf("Detective! pls choose one token and enter its name as a string : \n");
-            turn = 0;
-        }
-        if (game_round % 2 == 1) {
-            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-            turn = 1;
-        }
-        choose_token( head );
-        printmap(head);
-        /////////////
-        token_print_notes();
-        if (game_round % 2 == 0) {
-            printf("Detective! pls choose one token and enter its name as a string : \n");
-            turn = 0;
-        }
-        if (game_round % 2 == 1)
-        {
-            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-            turn = 1;
-        }
-        choose_token( head );
-        printmap(head);
-        //////////
-        token_print_notes();
-        if (game_round % 2 == 0) {
-            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-            turn = 1;
-        }
-        if (game_round % 2 == 1) {
-            printf("Detective! pls choose one token and enter its name as a string : \n");
-            turn = 0;
-        }
-        choose_token( head );
-        printmap(head);
-        printf("- - - - - - - - - - - - - - -\n");
-
+//        if (game_round % 2 == 0) {
+//            token2();
+//        }
+//        if (game_round % 2 == 1) {
+//            token1();
+//        }
+//        if (game_round % 2 == 0) {
+//            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+//            turn = 1;
+//        }
+//        if (game_round % 2 == 1) {
+//            printf("Detective! pls choose one token and enter its name as a string : \n");
+//            turn = 0;
+//        }
+//        choose_token( head );
+//        printmap(head);
+//        ////////////
+//        token_print_notes();
+//        if (game_round % 2 == 0) {
+//            printf("Detective! pls choose one token and enter its name as a string : \n");
+//            turn = 0;
+//        }
+//        if (game_round % 2 == 1) {
+//            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+//            turn = 1;
+//        }
+//        choose_token( head );
+//        printmap(head);
+//        /////////////
+//        token_print_notes();
+//        if (game_round % 2 == 0) {
+//            printf("Detective! pls choose one token and enter its name as a string : \n");
+//            turn = 0;
+//        }
+//        if (game_round % 2 == 1)
+//        {
+//            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+//            turn = 1;
+//        }
+//        choose_token( head );
+//        printmap(head);
+//        //////////
+//        token_print_notes();
+//        if (game_round % 2 == 0) {
+//            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+//            turn = 1;
+//        }
+//        if (game_round % 2 == 1) {
+//            printf("Detective! pls choose one token and enter its name as a string : \n");
+//            turn = 0;
+//        }
+//        choose_token( head );
+//        printmap(head);
+//        printf("- - - - - - - - - - - - - - -\n");
+        can_see(head);
 //    fclose(write);
     }
 }
@@ -332,6 +344,7 @@ void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co ,int add
     nn->number = added_tile_count;
     nn->hour = h;
     nn->alibi_status = 1;
+    nn->det_vision = 0;
     nn->next = NULL;
     if (*head_ref == NULL)
     {
@@ -780,3 +793,580 @@ void alibi(struct tile* head , int turn)
         current->alibi_status = 0;
     }
 }
+//int toby_vision(struct tile *head)
+//{
+//    return detectives_vision(head , Toby);
+//}
+//int sherlock_vision(struct tile *head)
+//{
+//    return detectives_vision(head , Sherlock);
+//}
+//int watson_vision(struct tile *head)
+//{
+//    return detectives_vision(head , Watson);
+//}
+int detectives_vision(struct tile *head , int location) {
+// ** *1 *2 *3 **
+// *4 11 12 13 *5
+// *6 21 22 23 *7
+// *8 31 32 33 *9
+// ** 10 11 12 **
+    struct tile *current;
+    int flag = 0;
+    switch (location) {
+        case 1:
+            for (current = head;current->next != NULL && (current->row != 1 && current->column != 1); current = current->next);
+            if (current->end == up) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != down) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 2 && current->column != 1) &&
+                                 flag == 1; current = current->next);
+            if (current->end == up) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != down) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 3 && current->column != 1) &&
+                                 flag == 1; current = current->next);
+            if (current->end == up) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            }
+        case 10:
+            for (current = head;
+                 current->next != NULL && (current->row != 1 && current->column != 1); current = current->next);
+            if (current->end == down) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != up) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 2 && current->column != 1) &&
+                                 flag == 1; current = current->next);
+            if (current->end == down) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != up) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 3 && current->column != 1) &&
+                                 flag == 1; current = current->next);
+            if (current->end == down) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            }
+        case 2:
+            for (current = head;current->next != NULL && (current->row != 1 && current->column != 2); current = current->next);
+            if (current->end == up) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != down) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 2 && current->column != 2) &&
+                                 flag == 1; current = current->next);
+            if (current->end == up) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != down) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 3 && current->column != 2) &&
+                                 flag == 1; current = current->next);
+            if (current->end == up) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            }
+        case 11:
+            for (current = head;
+                 current->next != NULL && (current->row != 1 && current->column != 2); current = current->next);
+            if (current->end == down) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != up) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 2 && current->column != 2) &&
+                                 flag == 1; current = current->next);
+            if (current->end == down) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != up) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 3 && current->column != 2) &&
+                                 flag == 1; current = current->next);
+            if (current->end == down) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            }
+        case 3:
+            for (current = head;current->next != NULL && (current->row != 1 && current->column != 3); current = current->next);
+            if (current->end == up) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != down) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 2 && current->column != 3) &&
+                                 flag == 1; current = current->next);
+            if (current->end == up) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != down) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 3 && current->column != 3) &&
+                                 flag == 1; current = current->next);
+            if (current->end == up) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            }
+        case 12:
+            for (current = head;
+                 current->next != NULL && (current->row != 1 && current->column != 3); current = current->next);
+            if (current->end == down) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != up) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 2 && current->column != 3) &&
+                                 flag == 1; current = current->next);
+            if (current->end == down) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != up) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 3 && current->column != 3) &&
+                                 flag == 1; current = current->next);
+            if (current->end == down) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            }
+        case 4:
+            for (current = head;
+                 current->next != NULL && (current->row != 1 && current->column != 1); current = current->next);
+            if (current->end == left) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != right) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 1 && current->column != 2) &&
+                                 flag == 1; current = current->next);
+            if (current->end == left) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != right) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 1 && current->column != 3) &&
+                                 flag == 1; current = current->next);
+            if (current->end == left) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            }
+        case 5:
+            for (current = head;
+                 current->next != NULL && (current->row != 1 && current->column != 1); current = current->next);
+            if (current->end == right) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != left) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 1 && current->column != 2) &&
+                                 flag == 1; current = current->next);
+            if (current->end == right) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != left) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 1 && current->column != 3) &&
+                                 flag == 1; current = current->next);
+            if (current->end == right) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            }
+        case 6:
+            for (current = head;
+                 current->next != NULL && (current->row != 2 && current->column != 1); current = current->next);
+            if (current->end == left) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != right) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 2 && current->column != 2) &&
+                                 flag == 1; current = current->next);
+            if (current->end == left) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != right) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 2 && current->column != 3) &&
+                                 flag == 1; current = current->next);
+            if (current->end == left) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            }
+        case 7:
+            for (current = head;
+                 current->next != NULL && (current->row != 2 && current->column != 1); current = current->next);
+            if (current->end == right) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != left) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 2 && current->column != 2) &&
+                                 flag == 1; current = current->next);
+            if (current->end == right) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != left) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 2 && current->column != 3) &&
+                                 flag == 1; current = current->next);
+            if (current->end == right) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            }
+        case 8:
+            for (current = head;
+                 current->next != NULL && (current->row != 1 && current->column != 1); current = current->next);
+            if (current->end == left) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != right) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 1 && current->column != 2) &&
+                                 flag == 1; current = current->next);
+            if (current->end == left) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != right) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 1 && current->column != 3) &&
+                                 flag == 1; current = current->next);
+            if (current->end == left) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            }
+        case 9:
+            for (current = head;
+                 current->next != NULL && (current->row != 3 && current->column != 1); current = current->next);
+            if (current->end == right) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != left) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 3 && current->column != 2) &&
+                                 flag == 1; current = current->next);
+            if (current->end == right) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            } else if (current->end != left) {
+                flag = 1;
+            }
+            for (current = head; current->next != NULL && (current->row != 3 && current->column != 3) &&
+                                 flag == 1; current = current->next);
+            if (current->end == right) {
+                return 0;
+            }
+            if (current->is_jack == 1) {
+                return 1;
+            }
+    }
+}
+void can_see(struct tile *head)
+{
+//    if((toby_vision(head) == 1) || (watson_vision(head) == 1) || (sherlock_vision(head) == 1))
+//    {
+//        rotate_tile(head , Toby);
+//        rotate_tile(head , Watson);
+//        rotate_tile(head , Sherlock);
+//    }
+    if (detectives_vision(head , Toby) == 1)
+        printf("***TOBY CAN SEE\n");
+    if (detectives_vision(head , Watson) == 1)
+        printf("**WATSON CAN SEE\n");
+    if (detectives_vision(head , Sherlock) == 1)
+        printf("**SHERLOCK CAN SEE\n");
+}
+//void rotate_tile(struct tile *head , int location)
+//{
+//    struct tile *current;
+//    case 1:
+//        for (current = head ; current->next != NULL && (current->row != 1 && current -> column != 1) ; current = current->next);
+//        current->status = 0;
+//    for (current = head ; current->next != NULL && (current->row != 2 && current -> column != 1) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 3 && current -> column != 1) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    case 10:
+//        for (current = head ; current->next != NULL && (current->row != 1 && current -> column != 1) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 2 && current -> column != 1) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 3 && current -> column != 1) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    case 2:
+//        for (current = head ; current->next != NULL && (current->row != 1 && current -> column != 2) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 2 && current -> column != 2) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 3 && current -> column != 2) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    case 11:
+//        for (current = head ; current->next != NULL && (current->row != 1 && current -> column != 2) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 2 && current -> column != 2) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 3 && current -> column != 2) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    case 3:
+//        for (current = head ; current->next != NULL && (current->row != 1 && current -> column != 3) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 2 && current -> column != 3) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 3 && current -> column != 3) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    case 12:
+//        for (current = head ; current->next != NULL && (current->row != 1 && current -> column != 3) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 2 && current -> column != 3) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 3 && current -> column != 3) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    case 4:
+//        for (current = head ; current->next != NULL && (current->row != 1 && current -> column != 1) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 1 && current -> column != 2) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 1 && current -> column != 3) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    case 5:
+//        for (current = head ; current->next != NULL && (current->row != 1 && current -> column != 1) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 1 && current -> column != 2) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 1 && current -> column != 3) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    case 6:
+//        for (current = head ; current->next != NULL && (current->row != 2 && current -> column != 1) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 2 && current -> column != 2) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 2 && current -> column != 3) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    case 7:
+//        for (current = head ; current->next != NULL && (current->row != 2 && current -> column != 1) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 2 && current -> column != 2) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 2 && current -> column != 3) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    case 8:
+//        for (current = head ; current->next != NULL && (current->row != 3 && current -> column != 1) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 3 && current -> column != 2) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 3 && current -> column != 3) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    case 9:
+//        for (current = head ; current->next != NULL && (current->row != 3 && current -> column != 1) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 3 && current -> column != 2) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//    for (current = head ; current->next != NULL && (current->row != 3 && current -> column != 3) ; current = current->next);
+//    if(current->is_jack == 1)
+//    {
+//        flag = 1;
+//    }
+//}
+//}
