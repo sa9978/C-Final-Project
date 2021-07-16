@@ -15,6 +15,9 @@ struct tile{
     int column;
     char tile_name [3];
     enum tile_street end;
+    int status; // this parameter shows the tile is on the front side or not  ... 1 front 0 back
+    int is_jack; //this parameter shows the is jack or not ... jack1 innocent0
+    int number; //just a number between 1 & 9 , but unique for each tile
 };
 struct action_tokens{
     int rotation_joker;// 0 : rotation , 1 : joker
@@ -22,6 +25,12 @@ struct action_tokens{
     int toby_watson; // 0 : toby , 1 : watson
     int sherlock_alibi; // 0 : sherlock , 1 : alibi
 };
+struct t
+{
+    struct t *next;
+};
+struct t *h = NULL;
+int turn; // 0detective 1mr.jack
 int rotation_joker_status; //0 for didnt printed
 int rotation_exchange_status;
 int toby_watson_status;
@@ -35,13 +44,14 @@ int Sherlock;
 int Watson;
 char MrJacks_real_name_st[3];
 int tiles_array_check_repitition[10];
+int round_part;
 char game_name[30];
 int first_player_role , second_player_role; //1 for mr jack and 0 fo detective
 void start_game_menu();
 void new_game_menu();
 void random_tiles_at_first_time();
 void printmap(struct tile *head);
-void add_tile(struct tile** head_ref, char tile_info[3] ,int row ,int column);
+void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co , int added_tile_count);
 void detectives_places();
 void token1();
 void token2();
@@ -57,6 +67,9 @@ int watson2(int Watson);
 void sherlock();
 int sherlock1(int sherlock);
 int sherlock2(int sherlock);
+void joker();
+struct tile* exchange(struct tile *head);
+void alibi(struct tile* head , int turn);
 int main() {
     start_game_menu();
     return 0;
@@ -178,11 +191,16 @@ void new_game_menu() {
                 strcpy(tile_info, "SG");
             if (info == 9)
                 strcpy(tile_info, "WG");
-            add_tile(&head, tile_info, i, j);
-//         printf("tile %dth is added , name: %s , row : %d , col : %d\n" , added_tiles_count , tile_info , i , j);
+            add_tile(&head, tile_info, i, j , added_tiles_count);
+//            printf("%s , i = %d, j = %d\n" , tile_info , i , j);
             added_tiles_count++;
         }
     }
+    struct tile* curr;
+    for (curr = head ; curr != NULL && strcmpi(curr->tile_name , MrJacks_real_name_st) !=0 ; curr = curr->next);
+    curr->is_jack = 1;
+//    for (curr = head ; curr != NULL && curr->is_jack == 0 ; curr = curr->next);
+//    printf("mr jaaaaack = %s" , MrJacks_real_name_st);
     printf("- - - - - - - - - - - - - - -\n");
     if (game_round == 0) {
         Toby = 11;
@@ -196,22 +214,25 @@ void new_game_menu() {
     getchar();
     scanf("%c" , &start_char);
     char choice[10];
-    int round_part; //an integer between 0 & 1
+//    int round_part; //an integer between 0 & 1
     for (game_round = 1; game_round < 9; game_round++) {
         rotation_joker_status = 0;
         rotation_exchange_status = 0;
         sherlock_alibi_status = 0;
         toby_watson_status = 0;
-        round_part = 0;
-        printf("-%dth ROUND-\n", game_round);
+        printf("- - - - - - - - - - - - - - -\n-%dth ROUND-\n- - - - - - - - - - - - - - -\n", game_round);
         if (game_round % 2 == 0)
             token2();
         if (game_round % 2 == 1)
             token1();
-        if (game_round % 2 == 0)
+        if (game_round % 2 == 0) {
             printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-        if (game_round % 2 == 1)
+            turn = 1;
+        }
+        if (game_round % 2 == 1) {
             printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+        }
         scanf("%s", choice);
         choose_token(choice , head , round_part);
         printmap(head);
@@ -221,24 +242,32 @@ void new_game_menu() {
             token2();
         if (game_round % 2 == 1)
             token1();
-        if (game_round % 2 == 0)
+        if (game_round % 2 == 0) {
             printf("Detective! pls choose one token and enter its name as a string : \n");
-        if (game_round % 2 == 1)
+            turn = 0;
+        }
+        if (game_round % 2 == 1) {
             printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+        }
         scanf("%s", choice);
         choose_token(choice , head , round_part);
 //        detectives_places();
         printmap(head);
         /////////////
-        round_part = 1;
         if (game_round % 2 == 0)
             token2();
         if (game_round % 2 == 1)
             token1();
-        if (game_round % 2 == 0)
+        if (game_round % 2 == 0) {
             printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+        }
         if (game_round % 2 == 1)
+        {
             printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+        }
         scanf("%s", choice);
         choose_token(choice , head , round_part);
 //        detectives_places();
@@ -248,10 +277,14 @@ void new_game_menu() {
             token2();
         if (game_round % 2 == 1)
             token1();
-        if (game_round % 2 == 0)
+        if (game_round % 2 == 0) {
             printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-        if (game_round % 2 == 1)
+            turn = 1;
+        }
+        if (game_round % 2 == 1) {
             printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+        }
         scanf("%s", choice);
         choose_token(choice , head , round_part);
 //        detectives_places();
@@ -281,15 +314,17 @@ void random_tiles_at_first_time()
 //        printf("%d\t" , tiles_array_check_repitition[i]);
 //    printf("\n");
 }
-void add_tile(struct tile** head_ref, char tile_info[3] ,int row ,int column)
+void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co ,int added_tile_count)
 {
     struct tile* nn = (struct tile*) malloc(sizeof(struct tile));
     struct tile *last = *head_ref;
     int c = rand()%(left - up + 1) + up; //be soorate random samte bonbast moshakhas mishe
     strcpy(nn->tile_name , tile_info);
     nn->end = c;
-    nn->row = row;
-    nn->column = column;
+    nn->row = ro;
+    nn->column = co;
+    nn->status = 1;
+    nn->number = added_tile_count;
     nn->next = NULL;
     if (*head_ref == NULL)
     {
@@ -299,63 +334,85 @@ void add_tile(struct tile** head_ref, char tile_info[3] ,int row ,int column)
     while (last->next != NULL)
         last = last->next;
     last->next = nn;
-//    printf("**name : %s , end : %d , col : %d , row : %d\n" , nn->tile_name , nn->end , nn->row, nn->column );
+
     }
-void printmap(struct tile *head)
-{
+void printmap(struct tile *head) {
     printf("- - - - - - - - - - - - - - -\n");
     struct tile *current;
     current = head;
     int margin_count = 1;
-    for (int i = 0 ; i < 5 ; i++) {
+    for (int i = 0; i < 5; i++) {
         for (int j = 0; j < 5; j++) {
             if (j == 0 || j == 4 || i == 0 || i == 4) {
 //                printf("*");
                 if ((j == 0 && i == 0) || (i == 0 & j == 4) || (i == 4 && j == 0) || (i == 4 && j == 4))
-                    printf("**\t");
+                    printf("  \t");
                 else {
                     int f = 0;
-                    if(Toby == margin_count) {
+                    if (Toby == margin_count) {
                         printf("T");
                         f = 1;
                     }
-                    if (Sherlock == margin_count){
+                    if (Sherlock == margin_count) {
                         printf("S");
                         f = 1;
                     }
-                    if (Watson == margin_count){
+                    if (Watson == margin_count) {
                         printf("W");
                         f = 1;
                     }
-                    if(f == 1)
+                    if (f == 1)
                         printf("\t");
                     else
-                        printf("**\t");
+                        printf("  \t");
                     margin_count++;
                 }
 
-            } else
-            {
-                if(current->end == up)
-                    printf("U,%s\t" , current->tile_name);
-                if(current->end == down)
-                    printf("D,%s\t" , current->tile_name);
-                if(current->end == right)
-                    printf("R,%s\t" , current->tile_name);
-                if(current->end == left)
-                    printf("L,%s\t" , current->tile_name);
-                current = current->next;
-            }
+            } else {
+                int count = 0;
+                for (current = head; count < 9; current = current->next) {
+                    if ((current->row == i) && (current->column == j)) {
+                        if (current->status == 1) {
+                            if (current->end == up)
+                                printf("^,%s\t", current->tile_name);
+                            if (current->end == down)
+                                printf("v,%s\t", current->tile_name);
+                            if (current->end == right)
+                                printf(">,%s\t", current->tile_name);
+                            if (current->end == left)
+                                printf("<,%s\t", current->tile_name);
+                        }
+                        if (current->status == 0) {
+                            if (current->end == up)
+                                printf("^,--\t");
+                            if (current->end == down)
+                                printf("v,--\t");
+                            if (current->end == right)
+                                printf(">,--\t");
+                            if (current->end == left)
+                                printf("<,--\t");
+//                    current = current->next;
+                        }
+                    }
+                    count++;
+                }
 
+            }
         }
         printf("\n");
+//    int count = 0;
+//    for (current = head ; count < 9 ; current = current -> next)
+//    {
+//        printf("**name : %s , end : %d , col : %d , row : %d\n", current->tile_name, current->end, current->row,current->column);
+//        count++;
+//    }
     }
     printf("- - - - - - - - - - - - - - -\n");
 }
-void detectives_places()
-{
-    printf("Toby : %d\nWatson : %d\nSherlock : %d\n", Toby, Watson, Sherlock);
-}
+//void detectives_places()
+//{
+//    printf("Toby : %d\nWatson : %d\nSherlock : %d\n", Toby, Watson, Sherlock);
+//}
 void token1()
 {
     tokens[2 * game_round - 1].rotation_joker = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
@@ -399,7 +456,7 @@ void token_print_notes(int r)
     if(tokens[r].rotation_exchange == 0 && rotation_exchange_status == 0)
         printf("2 : ROTATION2\nnote : you can rotate one tile to each side that you want\n");
     if(tokens[r].rotation_exchange == 1 && rotation_exchange_status == 0)
-        printf("2 : EXCHANGE\nnote : yo can change two tiles\n");
+        printf("2 : EXCHANGE\nnote : you can change two tiles\n");
 
     if(tokens[r].toby_watson == 0 && toby_watson_status == 0)
         printf("3 : TOBY\nnote : you can move Toby for one or two blocks\n");
@@ -423,11 +480,11 @@ void choose_token(char choice[10] , struct tile *head ,int round_part)
         rotation(head);
         rotation_joker_status = 1;
     }
-//    if(strcmpi(choice , "joker") == 0)
-//    {
-//        joker();
-//        rotation_joker_status = 1;
-//    }
+    if(strcmpi(choice , "joker") == 0)
+    {
+        joker();
+        rotation_joker_status = 1;
+    }
     if(strcmpi(choice , "toby") == 0) {
         toby();
         toby_watson_status = 1;
@@ -440,17 +497,17 @@ void choose_token(char choice[10] , struct tile *head ,int round_part)
         sherlock();
         sherlock_alibi_status=1;
     }
-//    if(strcmpi(choice , "exchange") == 0)
-//    {
-//        exchange(head);
-//        rotation_exchange_status = 1;
+    if(strcmpi(choice , "exchange") == 0)
+    {
+        head = exchange(head);
+        rotation_exchange_status = 1;
 
-//    }
-//    if(strcmpi(choice , "alibi") == 0)
-//    {
-//        alibi();
-//        sherlock_alibi_status = 1;
-//    }
+    }
+    if(strcmpi(choice , "alibi") == 0)
+    {
+        alibi(head , turn);
+        sherlock_alibi_status = 1;
+    }
 }
 void rotation(struct tile* head)
 {
@@ -621,4 +678,74 @@ int sherlock2(int Sherlock)
         case 11:   return 8;
         case 12:   return 10;
     }
+}
+void joker()
+{
+    char character[10];
+    printf("choose the detective that you want to move it (sherlock , toby , watson) : \n");
+    scanf("%s" , character);
+    if (strcmpi(character , "sherlock") == 0)
+        Sherlock = sherlock1(Sherlock);
+    if (strcmpi(character , "watson") == 0)
+        Watson = watson1(Watson);
+    if (strcmpi(character , "toby") == 0)
+        Toby = toby1(Toby);
+}
+struct tile* exchange(struct tile* head)
+{
+    struct tile *new;
+    char sus1[3] , sus2[3];
+    printf("pls enter the name of suspects that you want to change them : \n");
+    scanf("%s" , sus1);
+    scanf("%s" , sus2);
+    struct tile* current1;
+    struct tile* current2;
+    for (current1 = head; current1->next != NULL && strcmpi(current1->tile_name, sus1) != 0; current1 = current1->next);
+    for (current2 = head; current2->next != NULL && strcmpi(current2->tile_name, sus2) != 0; current2 = current2->next);
+    char temp[3];
+    int c1 , c2 , r1 , r2 , e1 , e2;
+    c1 = current1->column;
+    c2 = current2 ->column;
+    r1 = current1 -> row;
+    r2 = current2 ->row;
+    e1 = current1->end;
+    e2 = current2->end;
+//    printf("r1 = %d . c1 = %d , sus1 = %s , r2 = %d . c2 = %d , sus2 = %s \n" , r1 , c1 , sus1 , r2 , c2 , sus2);
+    int flag = 0;
+    for (new = head; new->next != NULL; new = new->next) {
+        if( strcmpi(new->tile_name, sus1) == 0 && flag == 0) {
+            new->row = r2;
+            new->column = c2;
+            new ->end = e1;
+//            strcpy(new->tile_name, sus2);
+            flag = 1;
+            printf("name = %s , row = %d , col = %d , end = %d\n" , new->tile_name , new ->row , new->column , new->end);
+        }
+    }
+    for (new = head; new->next != NULL; new = new->next)
+    {
+        if(strcmpi(new->tile_name, sus2) == 0 && flag == 1) {
+            new->row = r1;
+            new->column = c1;
+            new ->end = e2;
+//            strcpy(new->tile_name, sus1);
+            printf("*name = %s , row = %d , col = %d , end = %d\n" , new->tile_name , new ->row , new->column , new->end);
+        }
+    }
+    return new;
+}
+void alibi(struct tile* head , int turn)
+{
+    srand(time(0));
+    int r;
+    struct tile* current;
+    if (turn == 0) //detective's turn
+    {
+        do {
+            r = rand()%(9 - 1 + 1) + 1;
+            for (current = head ; current!= NULL && current->number != r ; current = current->next );
+        } while (current->is_jack == 1 || current->status == 0);
+    }
+    printf("%s is reversed\n" , current->tile_name);
+    current->status = 0;
 }
