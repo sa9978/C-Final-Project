@@ -476,6 +476,7 @@ void choose_token(struct tile *head)
     char choice[10] ;
     int flag = 0;
     do {
+        fflush(stdin);
         scanf("%s" , choice);
         if (strcmpi(choice, "rotation1") == 0) {
             rotation(head);
@@ -525,9 +526,11 @@ void rotation(struct tile* head)
 {
     printf("pls enter name of the character that you want to rotate: \n");
     char rotate_character[3];
+    fflush(stdin);
     scanf("%s" , rotate_character);
     printf("which direction do yo want to be closed?(up , down , left , right)\n");
     char dir[10];
+    fflush(stdin);
     scanf("%s" , dir);
     struct tile* current;
     for (current = head; current->next != NULL && strcmpi(current->tile_name, rotate_character) != 0; current = current->next);
@@ -544,6 +547,7 @@ void toby()
 {
     printf("how many blocks do you want to move TOBY? (1 or 2) ");
     int toby_blocks;
+    fflush(stdin);
         scanf("%d" , &toby_blocks);
     if (toby_blocks == 1)
     {
@@ -594,6 +598,7 @@ void watson()
 {
     printf("how many blocks do you want to move WATSON? (1 or 2) ");
     int watson_blocks;
+    fflush(stdin);
     scanf("%d" , &watson_blocks);
     if (watson_blocks == 1)
     {
@@ -644,6 +649,7 @@ void sherlock()
 {
     printf("how many blocks do you want to move SHERLOCK? (1 or 2) ");
     int sherlock_blocks;
+    fflush(stdin);
     scanf("%d" , &sherlock_blocks);
     if (sherlock_blocks == 1)
     {
@@ -694,6 +700,7 @@ void joker()
 {
     char character[10];
     printf("choose the detective that you want to move it (sherlock , toby , watson) : \n");
+    fflush(stdin);
     scanf("%s" , character);
     if (strcmpi(character , "sherlock") == 0)
         Sherlock = sherlock1(Sherlock);
@@ -707,7 +714,9 @@ struct tile* exchange(struct tile* head)
     struct tile *new;
     char sus1[3] , sus2[3];
     printf("pls enter the name of suspects that you want to change them : \n");
+    fflush(stdin);
     scanf("%s" , sus1);
+    fflush(stdin);
     scanf("%s" , sus2);
     struct tile* current1;
     struct tile* current2;
