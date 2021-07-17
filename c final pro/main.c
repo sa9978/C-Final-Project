@@ -20,7 +20,7 @@ struct tile{
     int column;
     char tile_name [3];
     enum tile_street end;
-    int status; // this parameter shows the tile is on the front side or not  ... 1 front 0 back
+    int status; // this parameter shows the tile is on the front side or not  ... 1 : front// 0 : back
     int is_jack; //this parameter shows the is jack or not ... jack1 innocent0
     int number; //just a number between 1 & 9 , but unique for each tile
     int hour; // count hourglasses
@@ -81,8 +81,8 @@ int detectives_vision(struct tile *head , int location);
 int toby_vision(struct tile *head);
 int watson_vision(struct tile *head);
 int sherlock_vision(struct tile *head);
-void can_see(struct tile *head);
-void rotate_tile(struct tile *head , int location);
+int can_see(struct tile *head);
+int rotate_tile_cant_see(struct tile *head , int location);
 int main() {
     start_game_menu();
     return 0;
@@ -307,15 +307,9 @@ void new_game_menu() {
 //            turn = 0;
 //        }
 //        choose_token( head );
-//        printmap(head);
 //        printf("- - - - - - - - - - - - - - -\n");
-        printf("toby sent\n");
-        detectives_vision(head , Toby);
-        printf("watson sent\n");
-        detectives_vision(head , Watson);
-        printf("sherlock sent\n");
-        detectives_vision(head , Sherlock);
-//        can_see(head);
+        can_see(head);
+        printmap(head);
 //    fclose(write);
     }
 }
@@ -812,31 +806,31 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current1->is_jack == 1) {
-            printf("1 :row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
+//            printf("1 :row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
             return 1;
         } else if (current1->end == down) {
             return 0;
         }
-        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
         ////
         for (current2 = head; ((current2->row != 2) || (current2->column != 1)); current2 = current2->next);
         if (current2->end == up) {
             return 0;
         }
         if (current2->is_jack == 1) {
-            printf("1 :row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
+//            printf("1 :row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
             return 1;
         } else if (current2->end == down) {
             return 0;
         }
-        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
         //
         for (current3 = head; ((current3->row != 3) || (current3->column != 1)); current3 = current3->next);
         if (current3->end == up) {
             return 0;
         }
         if (current3->is_jack == 1) {
-            printf("1 :row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
+//            printf("1 :row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
             return 1;
         }
         return 0;
@@ -849,31 +843,31 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current1->is_jack == 1) {
-            printf("2 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
+//            printf("2 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
             return 1;
         } else if (current1->end == down) {
             return 0;
         }
-        printf("case : 2 , az %d %d rad sod\n" ,current1->row , current1->column );
+//        printf("case : 2 , az %d %d rad sod\n" ,current1->row , current1->column );
         //
         for (current2 = head; ((current2->row != 2) || (current2->column != 2)); current2 = current2->next);
         if (current2->end == up) {
             return 0;
         }
         if (current2->is_jack == 1) {
-            printf("2 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
+//            printf("2 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
             return 1;
         } else if (current2->end == down) {
             return 0;
         }
-        printf("case : 2 , az %d %d rad sod\n" ,current2->row , current2->column );
+//        printf("case : 2 , az %d %d rad sod\n" ,current2->row , current2->column );
         //
         for (current3 = head; ((current3->row != 3) || (current3->column != 2)); current3 = current3->next);
         if (current3->end == up) {
             return 0;
         }
         if (current3->is_jack == 1) {
-            printf("2 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
+//            printf("2 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
             return 1;
         }
         return 0;
@@ -886,31 +880,31 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current1->is_jack == 1) {
-            printf("3 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
+//            printf("3 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
             return 1;
         } else if (current1->end == down) {
             return 0;
         }
-        printf("case : 3 , az %d %d rad sod\n" ,current1->row , current1->column );
+//        printf("case : 3 , az %d %d rad sod\n" ,current1->row , current1->column );
         //
         for (current2 = head; ((current2->row != 2) || (current2->column != 3)); current2 = current2->next);
         if (current2->end == up) {
             return 0;
         }
         if (current2->is_jack == 1) {
-            printf("3 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
+//            printf("3 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
             return 1;
         } else if (current2->end == down) {
             return 0;
         }
-        printf("case : 3 , az %d %d rad sod\n" ,current2->row , current2->column );
+//        printf("case : 3 , az %d %d rad sod\n" ,current2->row , current2->column );
         //
         for (current3 = head; ((current3->row != 3) || (current3->column != 3)); current3 = current3->next);
         if (current3->end == up) {
             return 0;
         }
         if (current3->is_jack == 1) {
-            printf("3 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
+//            printf("3 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
             return 1;
         }
         return 0;
@@ -923,31 +917,31 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current1->is_jack == 1) {
-            printf("4 : row = %d , col = %d , is_jack = %d\n", current1->row, current1->column, current1->is_jack);
+//            printf("4 : row = %d , col = %d , is_jack = %d\n", current1->row, current1->column, current1->is_jack);
             return 1;
         } else if (current1->end == right) {
             return 0;
         }
-        printf("case : 4 , az %d %d rad sod\n", current1->row, current1->column);
+//        printf("case : 4 , az %d %d rad sod\n", current1->row, current1->column);
         //
         for (current2 = head;((current2->row != 1) || (current2->column != 2)); current2 = current2->next);
         if (current2->end == left) {
             return 0;
         }
         if (current2->is_jack == 1) {
-            printf("4 : row = %d , col = %d , is_jack = %d\n", current2->row, current2->column, current2->is_jack);
+//            printf("4 : row = %d , col = %d , is_jack = %d\n", current2->row, current2->column, current2->is_jack);
             return 1;
         } else if (current2->end == right) {
             return 0;
         }
-        printf("case : 4 , az %d %d rad sod\n", current2->row, current2->column);
+//        printf("case : 4 , az %d %d rad sod\n", current2->row, current2->column);
         //
         for (current3 = head;((current3->row != 1) || (current3->column != 3)); current3 = current3->next);
         if (current3->end == left) {
             return 0;
         }
         if (current3->is_jack == 1) {
-            printf("4 : row = %d , col = %d , is_jack = %d\n", current3->row, current3->column, current3->is_jack);
+//            printf("4 : row = %d , col = %d , is_jack = %d\n", current3->row, current3->column, current3->is_jack);
             return 1;
         }
         return 0;
@@ -960,31 +954,31 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current1->is_jack == 1) {
-            printf("5 : row = %d , col = %d , is_jack = %d\n", current1->row, current1->column, current1->is_jack);
+//            printf("5 : row = %d , col = %d , is_jack = %d\n", current1->row, current1->column, current1->is_jack);
             return 1;
         } else if (current1->end == left) {
             return 0;
         }
-        printf("case : 5 , az %d %d rad sod\n", current1->row, current1->column);
+//        printf("case : 5 , az %d %d rad sod\n", current1->row, current1->column);
         //
         for (current2 = head;(current2->row != 1 || current2->column != 2); current2 = current2->next);
         if (current2->end == right) {
             return 0;
         }
         if (current2->is_jack == 1) {
-            printf("5 : row = %d , col = %d , is_jack = %d\n", current2->row, current2->column, current2->is_jack);
+//            printf("5 : row = %d , col = %d , is_jack = %d\n", current2->row, current2->column, current2->is_jack);
             return 1;
         } else if (current2->end == left) {
             return 0;
         }
-        printf("case : 5 , az %d %d rad sod\n", current2->row, current2->column);
+//        printf("case : 5 , az %d %d rad sod\n", current2->row, current2->column);
         //
         for (current3 = head;(current3->row != 1 || current3->column != 1); current3 = current3->next);
         if (current3->end == right) {
             return 0;
         }
         if (current3->is_jack == 1) {
-            printf("5 : row = %d , col = %d , is_jack = %d\n", current3->row, current3->column, current3->is_jack);
+//            printf("5 : row = %d , col = %d , is_jack = %d\n", current3->row, current3->column, current3->is_jack);
             return 1;
         }
         return 0;
@@ -998,31 +992,31 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current1->is_jack == 1) {
-            printf("6 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
+//            printf("6 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
             return 1;
         } else if (current1->end == right) {
             return 0;
         }
-        printf("case : 6 , az %d %d rad sod\n" ,current1->row , current1->column );
+//        printf("case : 6 , az %d %d rad sod\n" ,current1->row , current1->column );
         //
         for (current2 = head; ((current2->row != 2) || (current2->column != 2)); current2 = current2->next);
         if (current2->end == left) {
             return 0;
         }
         if (current2->is_jack == 1) {
-            printf("6 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
+//            printf("6 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
             return 1;
         } else if (current2->end == right) {
             return 0;
         }
-        printf("case : 6 , az %d %d rad sod\n" ,current2->row , current2->column );
+//        printf("case : 6 , az %d %d rad sod\n" ,current2->row , current2->column );
         //
         for (current3 = head; ((current3->row != 2) || (current3->column != 3)); current3 = current3->next);
         if (current3->end == left) {
             return 0;
         }
         if (current3->is_jack == 1) {
-            printf("6 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
+//            printf("6 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
             return 1;
         }
         return 0;
@@ -1035,31 +1029,31 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current1->is_jack == 1) {
-            printf("7 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
+//            printf("7 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
             return 1;
         } else if (current1->end == left) {
             return 0;
         }
-        printf("case : 7 , az %d %d rad sod\n" ,current1->row , current1->column );
+//        printf("case : 7 , az %d %d rad sod\n" ,current1->row , current1->column );
         //
         for (current2 = head; ((current2->row != 2) || (current2->column != 2)); current2 = current2->next);
         if (current2->end == right) {
             return 0;
         }
         if (current2->is_jack == 1) {
-            printf("7 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
+//            printf("7 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
             return 1;
         } else if (current2->end == left) {
             return 0;
         }
-        printf("case : 7 , az %d %d rad sod\n" ,current2->row , current2->column );
+//        printf("case : 7 , az %d %d rad sod\n" ,current2->row , current2->column );
         //
         for (current3 = head; ((current3->row != 2) || (current3->column != 1)); current3 = current3->next);
         if (current3->end == right) {
             return 0;
         }
         if (current3->is_jack == 1) {
-            printf("7 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
+//            printf("7 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
             return 1;
         }
         return 0;
@@ -1072,31 +1066,31 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current1->is_jack == 1) {
-            printf("8 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
+//            printf("8 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
             return 1;
         } else if (current1->end == right) {
             return 0;
         }
-        printf("case : 8 , az %d %d rad sod\n" ,current1->row , current1->column );
+//        printf("case : 8 , az %d %d rad sod\n" ,current1->row , current1->column );
         //
         for (current2 = head; ((current2->row != 3) || (current2->column != 2)); current2 = current2->next);
         if (current2->end == left) {
             return 0;
         }
         if (current2->is_jack == 1) {
-            printf("8 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
+//            printf("8 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
             return 1;
         } else if (current2->end == right) {
             return 0;
         }
-        printf("case : 8 , az %d %d rad sod\n" ,current2->row , current2->column );
+//        printf("case : 8 , az %d %d rad sod\n" ,current2->row , current2->column );
         //
         for (current3 = head; ((current3->row != 3) || (current3->column != 3)); current3 = current3->next);
         if (current3->end == left) {
             return 0;
         }
         if (current3->is_jack == 1) {
-            printf("8 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
+//            printf("8 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
             return 1;
         }
         return 0;
@@ -1109,31 +1103,31 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current1->is_jack == 1) {
-            printf("9 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
+//            printf("9 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
             return 1;
         } else if (current1->end == left) {
             return 0;
         }
-        printf("case : 9 , az %d %d rad sod\n" ,current1->row , current1->column );
+//        printf("case : 9 , az %d %d rad sod\n" ,current1->row , current1->column );
         //
         for (current2 = head; ((current2->row != 3) || (current2->column != 2)); current2 = current2->next);
         if (current2->end == right) {
             return 0;
         }
         if (current2->is_jack == 1) {
-            printf("9 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
+//            printf("9 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
             return 1;
         } else if (current2->end == left) {
             return 0;
         }
-        printf("case : 9 , az %d %d rad sod\n" ,current2->row , current2->column );
+//        printf("case : 9 , az %d %d rad sod\n" ,current2->row , current2->column );
         //
         for (current3 = head; ((current3->row != 3) || (current3->column != 1)); current3 = current3->next);
         if (current3->end == right) {
             return 0;
         }
         if (current3->is_jack == 1) {
-            printf("9 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
+//            printf("9 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
             return 1;
         }
         return 0;
@@ -1146,7 +1140,7 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current1->is_jack == 1) {
-            printf("10 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
+//            printf("10 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
             return 1;
         } else if (current1->end == up) {
             return 0;
@@ -1157,19 +1151,19 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current2->is_jack == 1) {
-            printf("10 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
+//            printf("10 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
             return 1;
         } else if (current2->end == up) {
             return 0;
         }
-        printf("case : 10 , az %d %d rad sod\n" ,current2->row , current2->column );
+//        printf("case : 10 , az %d %d rad sod\n" ,current2->row , current2->column );
         //
         for (current3 = head; ((current3->row != 1) || (current3->column != 1)); current3 = current3->next);
         if (current3->end == down) {
             return 0;
         }
         if (current3->is_jack == 1) {
-            printf("10 :row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
+//            printf("10 :row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
             return 1;
         }
         return 0;
@@ -1182,31 +1176,31 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current1->is_jack == 1) {
-            printf("11 : row = %d , col = %d , is_jack = %d\n", current1->row, current1->column, current1->is_jack);
+//            printf("11 : row = %d , col = %d , is_jack = %d\n", current1->row, current1->column, current1->is_jack);
             return 1;
         } else if (current1->end == up) {
             return 0;
         }
-        printf("case : 11 , az %d %d rad sod\n", current1->row, current1->column);
+//        printf("case : 11 , az %d %d rad sod\n", current1->row, current1->column);
         //
         for (current2 = head; ((current2->row != 2) || (current2->column != 2)); current2 = current2->next);
         if (current2->end == down) {
             return 0;
         }
         if (current2->is_jack == 1) {
-            printf("11 : row = %d , col = %d , is_jack = %d\n", current2->row, current2->column, current2->is_jack);
+//            printf("11 : row = %d , col = %d , is_jack = %d\n", current2->row, current2->column, current2->is_jack);
             return 1;
         } else if (current2->end == up) {
             return 0;
         }
-        printf("case : 11 , az %d %d rad sod\n", current2->row, current2->column);
+//        printf("case : 11 , az %d %d rad sod\n", current2->row, current2->column);
         //
         for (current3 = head; ((current3->row != 1) || (current3->column != 2)); current3 = current3->next);
         if (current3->end == down) {
             return 0;
         }
         if (current3->is_jack == 1) {
-            printf("11 : row = %d , col = %d , is_jack = %d\n", current3->row, current3->column, current3->is_jack);
+//            printf("11 : row = %d , col = %d , is_jack = %d\n", current3->row, current3->column, current3->is_jack);
             return 1;
         }
         return 0;
@@ -1219,7 +1213,7 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current1->is_jack == 1) {
-            printf("12 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
+//            printf("12 : row = %d , col = %d , is_jack = %d\n" , current1->row , current1->column , current1->is_jack);
             return 1;
         } else if (current1->end == up) {
             return 0;
@@ -1230,22 +1224,402 @@ int detectives_vision(struct tile *head , int location) {
             return 0;
         }
         if (current2->is_jack == 1) {
-            printf("12 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
+//            printf("12 : row = %d , col = %d , is_jack = %d\n" , current2->row , current2->column , current2->is_jack);
             return 1;
         } else if (current2->end == up) {
             return 0;
         }
-        printf("case : 12 , az %d %d rad sod\n" ,current2->row , current2->column );
+//        printf("case : 12 , az %d %d rad sod\n" ,current2->row , current2->column );
         //
         for (current3 = head; ((current3->row != 1) || (current3->column != 3)); current3 = current3->next);
         if (current3->end == down) {
             return 0;
         }
         if (current3->is_jack == 1) {
-            printf("12 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
+//            printf("12 : row = %d , col = %d , is_jack = %d\n" , current3->row , current3->column , current3->is_jack);
             return 1;
         }
         return 0;
     }
 
+}
+int can_see(struct tile *head)
+{
+    if((detectives_vision(head , Toby) == 1) || (detectives_vision(head , Watson) == 1) || (detectives_vision(head , Sherlock) == 1))
+    {
+        printf("**MR.JACK CAN be seen by detectives!**\n");
+    }
+    if((detectives_vision(head , Toby) == 0) && (detectives_vision(head , Watson) == 0) && (detectives_vision(head , Sherlock) == 0))
+    {
+        printf("**MR.JACK CAN'T be seen by detectives!**\n");
+        rotate_tile_cant_see(head , Toby);
+        rotate_tile_cant_see(head , Watson);
+        rotate_tile_cant_see(head , Sherlock);
+    }
+}
+int rotate_tile_cant_see(struct tile *head , int location)
+{
+    struct tile *current1;
+    struct tile *current2;
+    struct tile *current3;
+    if (location == 1)
+    {
+        for (current1 = head;((current1->row != 1) || (current1->column != 1)); current1 = current1->next);
+        if (current1->end == up) {
+            return 0;
+        }
+        current1->status = 0;
+        if (current1->end == down) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 1)); current2 = current2->next);
+        if (current2->end == up) {
+            return 0;
+        }
+        current2->status = 0;
+        if (current2->end == down) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 3) || (current3->column != 1)); current3 = current3->next);
+        if (current3->end == up) {
+            return 0;
+        }
+        current3->status = 0;
+        return 0;
+    }
+    /////////////////////
+    if (location == 2)
+    {
+        for (current1 = head;((current1->row != 1) || (current1->column != 2)); current1 = current1->next);
+        if (current1->end == up) {
+            return 0;
+        }
+        current1->status = 0;
+        if (current1->end == down) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == up) {
+            return 0;
+        }
+        current2->status = 0;
+        if (current2->end == down) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 3) || (current3->column != 2)); current3 = current3->next);
+        if (current3->end == up) {
+            return 0;
+        }
+        current3->status = 0;
+        return 0;
+    }
+    /////////////////////
+    if (location == 3)
+    {
+        for (current1 = head;((current1->row != 1) || (current1->column != 3)); current1 = current1->next);
+        if (current1->end == up) {
+            return 0;
+        }
+        current1->status = 0;
+        if (current1->end == down) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 3)); current2 = current2->next);
+        if (current2->end == up) {
+            return 0;
+        }
+        current2->status = 0;
+        if (current2->end == down) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 3) || (current3->column != 3)); current3 = current3->next);
+        if (current3->end == up) {
+            return 0;
+        }
+        current3->status = 0;
+        return 0;
+    }
+    /////////////////////
+    if (location == 4)
+    {
+        for (current1 = head;((current1->row != 1) || (current1->column != 1)); current1 = current1->next);
+        if (current1->end == left) {
+            return 0;
+        }
+        current1->status = 0;
+        if (current1->end == right) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 1) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == left) {
+            return 0;
+        }
+        current2->status = 0;
+        if (current2->end == right) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 1) || (current3->column != 3)); current3 = current3->next);
+        if (current3->end == left) {
+            return 0;
+        }
+        current3->status = 0;
+        return 0;
+    }
+    /////////////////////
+    if (location == 5)
+    {
+        for (current1 = head;((current1->row != 1) || (current1->column != 3)); current1 = current1->next);
+        if (current1->end == right) {
+            return 0;
+        }
+        current1->status = 0;
+        if (current1->end == left) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 1) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == right) {
+            return 0;
+        }
+        current2->status = 0;
+        if (current2->end == left) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 1) || (current3->column != 1)); current3 = current3->next);
+        if (current3->end == right) {
+            return 0;
+        }
+        current3->status = 0;
+        return 0;
+
+    }
+    /////////////////////
+    if (location == 6)
+    {
+        for (current1 = head;((current1->row != 2) || (current1->column != 1)); current1 = current1->next);
+        if (current1->end == left) {
+            return 0;
+        }
+        current1->status = 0;
+        if (current1->end == right) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == left) {
+            return 0;
+        }
+        current2->status = 0;
+        if (current2->end == right) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 2) || (current3->column != 3)); current3 = current3->next);
+        if (current3->end == left) {
+            return 0;
+        }
+        current3->status = 0;
+        return 0;
+    }
+    /////////////////////
+    if (location == 7)
+    {
+        for (current1 = head;((current1->row != 2) || (current1->column != 3)); current1 = current1->next);
+        if (current1->end == right) {
+            return 0;
+        }
+        current1->status = 0;
+        if (current1->end == left) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == right) {
+            return 0;
+        }
+        current2->status = 0;
+        if (current2->end == left) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 2) || (current3->column != 1)); current3 = current3->next);
+        if (current3->end == right) {
+            return 0;
+        }
+        current3->status = 0;
+        return 0;
+    }
+    /////////////////////
+    if (location == 8)
+    {
+        for (current1 = head;((current1->row != 3) || (current1->column != 1)); current1 = current1->next);
+        if (current1->end == left) {
+            return 0;
+        }
+        current1->status = 0;
+        if (current1->end == right) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 3) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == left) {
+            return 0;
+        }
+        current2->status = 0;
+        if (current2->end == right) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 3) || (current3->column != 3)); current3 = current3->next);
+        if (current3->end == left) {
+            return 0;
+        }
+        current3->status = 0;
+        return 0;
+    }
+    /////////////////////
+    if (location == 9)
+    {
+        for (current1 = head;((current1->row != 3) || (current1->column != 3)); current1 = current1->next);
+        if (current1->end == right) {
+            return 0;
+        }
+        current1->status = 0;
+        if (current1->end == left) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 3) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == right) {
+            return 0;
+        }
+        current2->status = 0;
+        if (current2->end == left) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 3) || (current3->column != 1)); current3 = current3->next);
+        if (current3->end == right) {
+            return 0;
+        }
+        current3->status = 0;
+        return 0;
+    }
+    /////////////////////
+    if (location == 10)
+    {
+        for (current1 = head;((current1->row != 3) || (current1->column != 1)); current1 = current1->next);
+        if (current1->end == down) {
+            return 0;
+        }
+        current1->status = 0;
+        if (current1->end == up) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 1)); current2 = current2->next);
+        if (current2->end == down) {
+            return 0;
+        }
+        current2->status = 0;
+        if (current2->end == up) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 1) || (current3->column != 1)); current3 = current3->next);
+        if (current3->end == down) {
+            return 0;
+        }
+        current3->status = 0;
+        return 0;
+    }
+    /////////////////////
+    if (location == 11)
+    {
+        for (current1 = head;((current1->row != 3) || (current1->column != 2)); current1 = current1->next);
+        if (current1->end == down) {
+            return 0;
+        }
+        current1->status = 0;
+        if (current1->end == up) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == down) {
+            return 0;
+        }
+        current2->status = 0;
+        if (current2->end == up) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 1) || (current3->column != 2)); current3 = current3->next);
+        if (current3->end == down) {
+            return 0;
+        }
+        current3->status = 0;
+        return 0;
+    }
+    /////////////////////
+    if (location == 12)
+    {
+        for (current1 = head;((current1->row != 3) || (current1->column != 3)); current1 = current1->next);
+        if (current1->end == down) {
+            return 0;
+        }
+        current1->status = 0;
+        if (current1->end == up) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 3)); current2 = current2->next);
+        if (current2->end == down) {
+            return 0;
+        }
+        current2->status = 0;
+        if (current2->end == up) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 1) || (current3->column != 3)); current3 = current3->next);
+        if (current3->end == down) {
+            return 0;
+        }
+        current3->status = 0;
+        return 0;
+    }
 }
