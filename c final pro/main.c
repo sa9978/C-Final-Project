@@ -95,6 +95,7 @@ void start_game_menu()
     printf("1- New Game\n");
     printf("2- Load Game\n");
     printf("3- Exit\n");
+    fflush(stdin);
     scanf("%d" , &start_key);
     if (start_key == 1)
         new_game_menu();
@@ -113,6 +114,7 @@ void new_game_menu() {
 //    do {
 //        printf("- Choose which role you want to play? (Mr.Jack/Detective)\n");
 //        char role[30];
+//        fflush(stdin);
 //        scanf("%s", role);
 //        if (strcmpi(role, "Mr.Jack") == 0) {
 //            first_player_role = 1;
@@ -132,6 +134,7 @@ void new_game_menu() {
 //    int close_eye;
 //    printf("- Mr.Jack's identity will be defined. if the detective close his/her eyes , mr jack enter '1'\n");
 //    do {
+//      fflush(stdin);
 //        scanf("%d", &close_eye);
 //        if (close_eye != 1)
 //            printf("DON'T CHEAT!!! CLOSE YOUR EYES!\nmr jack! if he/she closed his/her eyes enter '1'\n");
@@ -250,6 +253,7 @@ void new_game_menu() {
     printf("if you are ready , pls enter a character to start the game!\n");
     char start_char;
     getchar();
+    fflush(stdin);
     scanf("%c" , &start_char);
     char choice[10];
 //    int round_part; //an integer between 0 & 1
@@ -324,6 +328,7 @@ void new_game_menu() {
         }
         choose_token( head );
         printf("- - - - - - - - - - - - - - -\n");
+        printmap(head);
         can_see(head);
         printmap(head);
         if(detective_win_check(head) == 1)
@@ -596,7 +601,7 @@ void toby()
     printf("how many blocks do you want to move TOBY? (1 or 2) ");
     int toby_blocks;
     fflush(stdin);
-        scanf("%d" , &toby_blocks);
+    scanf("%d" , &toby_blocks);
     if (toby_blocks == 1)
     {
         Toby = toby1(Toby);
@@ -787,7 +792,7 @@ struct tile* exchange(struct tile* head)
             new ->end = e1;
 //            strcpy(new->tile_name, sus2);
             flag = 1;
-            printf("name = %s , row = %d , col = %d , end = %d\n" , new->tile_name , new ->row , new->column , new->end);
+//            printf("name = %s , row = %d , col = %d , end = %d\n" , new->tile_name , new ->row , new->column , new->end);
         }
     }
     for (new = head; new->next != NULL; new = new->next)
@@ -797,7 +802,7 @@ struct tile* exchange(struct tile* head)
             new->column = c1;
             new ->end = e2;
 //            strcpy(new->tile_name, sus1);
-            printf("*name = %s , row = %d , col = %d , end = %d\n" , new->tile_name , new ->row , new->column , new->end);
+//            printf("*name = %s , row = %d , col = %d , end = %d\n" , new->tile_name , new ->row , new->column , new->end);
         }
     }
     return new;
@@ -813,7 +818,7 @@ void alibi(struct tile* head , int turn)
             r = rand()%(9 - 1 + 1) + 1;
             for (current = head ; current!= NULL && current->number != r ; current = current->next );
         } while (current->is_jack == 1 || current->status == 0 || current->alibi_status ==0);
-        printf("%s is reversed\n" , current->tile_name);
+        printf("%s was reversed\n" , current->tile_name);
         current->status = 0;
         current->alibi_status = 0;
     }
@@ -1303,6 +1308,7 @@ int can_see(struct tile *head)
         rotate_tile_cant_see(head , Toby);
         rotate_tile_cant_see(head , Watson);
         rotate_tile_cant_see(head , Sherlock);
+        hourglass++;
     }
 }
 int rotate_tile_cant_see(struct tile *head , int location)
