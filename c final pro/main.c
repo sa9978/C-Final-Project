@@ -83,6 +83,9 @@ int watson_vision(struct tile *head);
 int sherlock_vision(struct tile *head);
 int can_see(struct tile *head);
 int rotate_tile_cant_see(struct tile *head , int location);
+int vision_can_see(struct tile *head , int location);
+int detective_win_check(struct tile *head);
+int jack_win_check(struct tile *head);
 int main() {
     start_game_menu();
     return 0;
@@ -241,6 +244,7 @@ void new_game_menu() {
         Watson = 5;
         Sherlock = 4;
     }
+    struct tile *current;
     printmap(head);
 
     printf("if you are ready , pls enter a character to start the game!\n");
@@ -249,67 +253,89 @@ void new_game_menu() {
     scanf("%c" , &start_char);
     char choice[10];
 //    int round_part; //an integer between 0 & 1
+
+
     for (game_round = 1; game_round < 9; game_round++) {
+        for (current = head ; current!= NULL ; current= current->next)
+        {
+            current->det_vision = 0;
+        }
         rotation_joker_status = 0;
         rotation_exchange_status = 0;
         sherlock_alibi_status = 0;
         toby_watson_status = 0;
         printf("- - - - - - - - - - - - - - -\n-%dth ROUND-\n- - - - - - - - - - - - - - -\n", game_round);
-//        if (game_round % 2 == 0) {
-//            token2();
-//        }
-//        if (game_round % 2 == 1) {
-//            token1();
-//        }
-//        if (game_round % 2 == 0) {
-//            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-//            turn = 1;
-//        }
-//        if (game_round % 2 == 1) {
-//            printf("Detective! pls choose one token and enter its name as a string : \n");
-//            turn = 0;
-//        }
-//        choose_token( head );
-//        printmap(head);
-//        ////////////
-//        token_print_notes();
-//        if (game_round % 2 == 0) {
-//            printf("Detective! pls choose one token and enter its name as a string : \n");
-//            turn = 0;
-//        }
-//        if (game_round % 2 == 1) {
-//            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-//            turn = 1;
-//        }
-//        choose_token( head );
-//        printmap(head);
-//        /////////////
-//        token_print_notes();
-//        if (game_round % 2 == 0) {
-//            printf("Detective! pls choose one token and enter its name as a string : \n");
-//            turn = 0;
-//        }
-//        if (game_round % 2 == 1)
-//        {
-//            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-//            turn = 1;
-//        }
-//        choose_token( head );
-//        printmap(head);
-//        //////////
-//        token_print_notes();
-//        if (game_round % 2 == 0) {
-//            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-//            turn = 1;
-//        }
-//        if (game_round % 2 == 1) {
-//            printf("Detective! pls choose one token and enter its name as a string : \n");
-//            turn = 0;
-//        }
-//        choose_token( head );
-//        printf("- - - - - - - - - - - - - - -\n");
+        if (game_round % 2 == 0) {
+            token2();
+        }
+        if (game_round % 2 == 1) {
+            token1();
+        }
+        if (game_round % 2 == 0) {
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+        }
+        if (game_round % 2 == 1) {
+            printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+        }
+        choose_token( head );
+        printmap(head);
+        if(detective_win_check(head) == 1)
+            main();
+        ////////////
+        token_print_notes();
+        if (game_round % 2 == 0) {
+            printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+        }
+        if (game_round % 2 == 1) {
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+        }
+        choose_token( head );
+        printmap(head);
+        if(detective_win_check(head) == 1)
+            main();
+        /////////////
+        token_print_notes();
+        if (game_round % 2 == 0) {
+            printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+        }
+        if (game_round % 2 == 1)
+        {
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+        }
+        choose_token( head );
+        printmap(head);
+        if(detective_win_check(head) == 1)
+            main();
+        //////////
+        token_print_notes();
+        if (game_round % 2 == 0) {
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+        }
+        if (game_round % 2 == 1) {
+            printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+        }
+        choose_token( head );
+        printf("- - - - - - - - - - - - - - -\n");
         can_see(head);
         printmap(head);
+        if(detective_win_check(head) == 1)
+            main();
+        if( jack_win_check(head) == 1)
+            main();
+        if(game_round == 8) {
+            printf("* * * * * * * * * * * *\n\n");
+            printf("congratulations!!!\nMR.JACK IS WINNER!\n\n");
+            printf(" * * * * * * * * * * * *\n\n");
+            main();
+        }
 //    fclose(write);
     }
 }
@@ -339,7 +365,14 @@ void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co ,int add
     struct tile *last = *head_ref;
     int c = rand()%(left - up + 1) + up; //be soorate random samte bonbast moshakhas mishe
     strcpy(nn->tile_name , tile_info);
-    nn->end = c;
+    if(ro == 1 && co == 3)
+        nn->end = right;
+    else if(ro == 1 && co == 1)
+        nn->end = left;
+    else if(ro == 3 && co == 2)
+        nn->end = down;
+    else
+        nn->end = c;
     nn->row = ro;
     nn->column = co;
     nn->status = 1;
@@ -400,7 +433,7 @@ void printmap(struct tile *head) {
                             if (current->end == down)
                                 printf("v,%s\t", current->tile_name);
                             if (current->end == right)
-                                printf(">,%s\t", current->tile_name);
+                                printf("%s,>\t", current->tile_name);
                             if (current->end == left)
                                 printf("<,%s\t", current->tile_name);
                         }
@@ -410,7 +443,7 @@ void printmap(struct tile *head) {
                             if (current->end == down)
                                 printf("v,--\t");
                             if (current->end == right)
-                                printf(">,--\t");
+                                printf("--,>\t");
                             if (current->end == left)
                                 printf("<,--\t");
 //                    current = current->next;
@@ -1248,6 +1281,21 @@ int can_see(struct tile *head)
     if((detectives_vision(head , Toby) == 1) || (detectives_vision(head , Watson) == 1) || (detectives_vision(head , Sherlock) == 1))
     {
         printf("**MR.JACK CAN be seen by detectives!**\n");
+        vision_can_see(head , Toby);
+        vision_can_see(head , Watson);
+        vision_can_see(head , Sherlock);
+        struct tile *current;
+        struct tile *current1;
+
+        for (current = head ; current != NULL ; current= current->next)
+        {
+            if(current->det_vision == 0)
+            {
+                current->status = 0;
+            }
+        }
+//        for (current1 = head;((current1->row != 3) || (current1->column != 3)); current1 = current1->next);
+//        current->status = 0;
     }
     if((detectives_vision(head , Toby) == 0) && (detectives_vision(head , Watson) == 0) && (detectives_vision(head , Sherlock) == 0))
     {
@@ -1622,4 +1670,401 @@ int rotate_tile_cant_see(struct tile *head , int location)
         current3->status = 0;
         return 0;
     }
+}
+int vision_can_see(struct tile *head , int location)
+{
+    struct tile *current1;
+    struct tile *current2;
+    struct tile *current3;
+    if (location == 1)
+    {
+        for (current1 = head;((current1->row != 1) || (current1->column != 1)); current1 = current1->next);
+        if (current1->end == up) {
+            return 0;
+        }
+        current1->det_vision = 1;
+        if (current1->end == down) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 1)); current2 = current2->next);
+        if (current2->end == up) {
+            return 0;
+        }
+        current2->det_vision = 1;
+        if (current2->end == down) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 3) || (current3->column != 1)); current3 = current3->next);
+        if (current3->end == up) {
+            return 0;
+        }
+        current3->det_vision = 1;
+        return 0;
+    }
+    /////////////////////
+    if (location == 2)
+    {
+        for (current1 = head;((current1->row != 1) || (current1->column != 2)); current1 = current1->next);
+        if (current1->end == up) {
+            return 0;
+        }
+        current1->det_vision = 1;
+        if (current1->end == down) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == up) {
+            return 0;
+        }
+        current2->det_vision = 1;
+        if (current2->end == down) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 3) || (current3->column != 2)); current3 = current3->next);
+        if (current3->end == up) {
+            return 0;
+        }
+        current3->det_vision = 1;
+        return 0;
+    }
+    /////////////////////
+    if (location == 3)
+    {
+        for (current1 = head;((current1->row != 1) || (current1->column != 3)); current1 = current1->next);
+        if (current1->end == up) {
+            return 0;
+        }
+        current1->det_vision = 1;
+        if (current1->end == down) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 3)); current2 = current2->next);
+        if (current2->end == up) {
+            return 0;
+        }
+        current2->det_vision = 1;
+        if (current2->end == down) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 3) || (current3->column != 3)); current3 = current3->next);
+        if (current3->end == up) {
+            return 0;
+        }
+        current3->det_vision = 1;
+        return 0;
+    }
+    /////////////////////
+    if (location == 4)
+    {
+        for (current1 = head;((current1->row != 1) || (current1->column != 1)); current1 = current1->next);
+        if (current1->end == left) {
+            return 0;
+        }
+        current1->det_vision = 1;
+        if (current1->end == right) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 1) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == left) {
+            return 0;
+        }
+        current2->det_vision = 1;
+        if (current2->end == right) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 1) || (current3->column != 3)); current3 = current3->next);
+        if (current3->end == left) {
+            return 0;
+        }
+        current3->det_vision = 1;
+        return 0;
+    }
+    /////////////////////
+    if (location == 5)
+    {
+        for (current1 = head;((current1->row != 1) || (current1->column != 3)); current1 = current1->next);
+        if (current1->end == right) {
+            return 0;
+        }
+        current1->det_vision = 1;
+        if (current1->end == left) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 1) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == right) {
+            return 0;
+        }
+        current2->det_vision = 1;
+        if (current2->end == left) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 1) || (current3->column != 1)); current3 = current3->next);
+        if (current3->end == right) {
+            return 0;
+        }
+        current3->det_vision = 1;
+        return 0;
+
+    }
+    /////////////////////
+    if (location == 6)
+    {
+        for (current1 = head;((current1->row != 2) || (current1->column != 1)); current1 = current1->next);
+        if (current1->end == left) {
+            return 0;
+        }
+        current1->det_vision = 1;
+        if (current1->end == right) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == left) {
+            return 0;
+        }
+        current2->det_vision = 1;
+        if (current2->end == right) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 2) || (current3->column != 3)); current3 = current3->next);
+        if (current3->end == left) {
+            return 0;
+        }
+        current3->det_vision = 1;
+        return 0;
+    }
+    /////////////////////
+    if (location == 7)
+    {
+        for (current1 = head;((current1->row != 2) || (current1->column != 3)); current1 = current1->next);
+        if (current1->end == right) {
+            return 0;
+        }
+        current1->det_vision = 1;
+        if (current1->end == left) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == right) {
+            return 0;
+        }
+        current2->det_vision = 1;
+        if (current2->end == left) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 2) || (current3->column != 1)); current3 = current3->next);
+        if (current3->end == right) {
+            return 0;
+        }
+        current3->det_vision = 1;
+        return 0;
+    }
+    /////////////////////
+    if (location == 8)
+    {
+        for (current1 = head;((current1->row != 3) || (current1->column != 1)); current1 = current1->next);
+        if (current1->end == left) {
+            return 0;
+        }
+        current1->det_vision = 1;
+        if (current1->end == right) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 3) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == left) {
+            return 0;
+        }
+        current2->det_vision = 1;
+        if (current2->end == right) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 3) || (current3->column != 3)); current3 = current3->next);
+        if (current3->end == left) {
+            return 0;
+        }
+        current3->det_vision = 1;
+        return 0;
+    }
+    /////////////////////
+    if (location == 9)
+    {
+        for (current1 = head;((current1->row != 3) || (current1->column != 3)); current1 = current1->next);
+        if (current1->end == right) {
+            return 0;
+        }
+        current1->det_vision = 1;
+        if (current1->end == left) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 3) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == right) {
+            return 0;
+        }
+        current2->det_vision = 1;
+        if (current2->end == left) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 3) || (current3->column != 1)); current3 = current3->next);
+        if (current3->end == right) {
+            return 0;
+        }
+        current3->det_vision = 1;
+        return 0;
+    }
+    /////////////////////
+    if (location == 10)
+    {
+        for (current1 = head;((current1->row != 3) || (current1->column != 1)); current1 = current1->next);
+        if (current1->end == down) {
+            return 0;
+        }
+        current1->det_vision = 1;
+        if (current1->end == up) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 1)); current2 = current2->next);
+        if (current2->end == down) {
+            return 0;
+        }
+        current2->det_vision = 1;
+        if (current2->end == up) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 1) || (current3->column != 1)); current3 = current3->next);
+        if (current3->end == down) {
+            return 0;
+        }
+        current3->det_vision = 1;
+        return 0;
+    }
+    /////////////////////
+    if (location == 11)
+    {
+        for (current1 = head;((current1->row != 3) || (current1->column != 2)); current1 = current1->next);
+        if (current1->end == down) {
+            return 0;
+        }
+        current1->det_vision = 1;
+        if (current1->end == up) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 2)); current2 = current2->next);
+        if (current2->end == down) {
+            return 0;
+        }
+        current2->det_vision = 1;
+        if (current2->end == up) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 1) || (current3->column != 2)); current3 = current3->next);
+        if (current3->end == down) {
+            return 0;
+        }
+        current3->det_vision = 1;
+        return 0;
+    }
+    /////////////////////
+    if (location == 12)
+    {
+        for (current1 = head;((current1->row != 3) || (current1->column != 3)); current1 = current1->next);
+        if (current1->end == down) {
+            return 0;
+        }
+        current1->det_vision = 1;
+        if (current1->end == up) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current1->row , current1->column );
+        ////
+        for (current2 = head; ((current2->row != 2) || (current2->column != 3)); current2 = current2->next);
+        if (current2->end == down) {
+            return 0;
+        }
+        current2->det_vision = 1;
+        if (current2->end == up) {
+            return 0;
+        }
+//        printf("case : 1 , az %d %d rad sod\n" ,current2->row , current2->column );
+        //
+        for (current3 = head; ((current3->row != 1) || (current3->column != 3)); current3 = current3->next);
+        if (current3->end == down) {
+            return 0;
+        }
+        current3->det_vision = 1;
+        return 0;
+    }
+}
+int detective_win_check(struct tile *head)
+{
+    struct tile *current ;
+    int front_count = 0;
+    for (current = head ; current != NULL ; current= current->next)
+    {
+        if(current->status == 1)
+        {
+            front_count++;
+        }
+    }
+    if ((front_count == 1) && ((game_round != 8)))
+    {
+        printf("* * * * * * * * * * * *\n\n");
+        printf("congratulations!!!\nDETECTIVE IS WINNER!\n\n");
+        printf(" * * * * * * * * * * * *\n");
+        return 1;
+    }
+    return 0;
+}
+int jack_win_check(struct tile *head)
+{
+    if(hourglass == 6)
+    {
+        printf("* * * * * * * * * * * *\n\n");
+        printf("congratulations!!!\nMR.JACK IS WINNER!\n\n");
+        printf(" * * * * * * * * * * * *\n");
+        return 1;
+    }
+    return 0;
 }
