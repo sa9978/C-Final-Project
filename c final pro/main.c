@@ -133,7 +133,7 @@ void start_game_menu()
     } while (flag == 0);
 }
 void new_game_menu() {
-        write = fopen("save.txt" , "a+");
+//        write = fopen("save.txt" , "a+");
         printf("- Please enter the name of this Game:\n");
         fflush(stdin);
         scanf("%s" , game_name);
@@ -329,7 +329,7 @@ void new_game_menu() {
         scanf("%s" , SaveChar);
         if (strcmpi(SaveChar , "save") == 0) {
             save_game(head);
-            printf("return?\n");
+            printf("1 for return\n");
             int ret;
             scanf("%d" , &ret);
             if (ret == 1)
@@ -2128,6 +2128,11 @@ int jack_win_check(struct tile *head)
 ///////////////////////
 void save_game(struct tile *head)
 {
+    write = fopen("save.txt", "w");
+    if(write == NULL)
+        printf("NULL\n");
+    printf("save game run :\n");
+    fprintf(write , "****");
     fprintf(write , "%s\n" , game_name);
     fprintf(write , "%d\n" , game_round);
     fprintf(write , "%s\n" , MrJacks_real_name_st);
@@ -2136,68 +2141,23 @@ void save_game(struct tile *head)
     file_print_map(head);
     fprintf(write , "*\n");
 }
-void file_print_map(struct tile *head)
-{
+void file_print_map(struct tile *head) {
     struct tile *current;
     current = head;
     int margin_count = 1;
-    for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 5; j++) {
-            if (j == 0 || j == 4 || i == 0 || i == 4) {
-                if ((j == 0 && i == 0) || (i == 0 & j == 4) || (i == 4 && j == 0) || (i == 4 && j == 4))
-                   fprintf(write , "  \t");
-                else {
-                    int f = 0;
-                    if (Toby == margin_count) {
-                        fprintf(write , "T");
-                        f = 1;
-                    }
-                    if (Sherlock == margin_count) {
-                        fprintf(write ,"S");
-                        f = 1;
-                    }
-                    if (Watson == margin_count) {
-                        fprintf(write , "W");
-                        f = 1;
-                    }
-                    if (f == 1)
-                        fprintf(write , "\t");
-                    else
-                        fprintf(write , "  \t");
-                    margin_count++;
-                }
-
-            } else {
-                int count = 0;
-                for (current = head; count < 9; current = current->next) {
-                    if ((current->row == i) && (current->column == j)) {
-                        if (current->status == 1) {
-                            if (current->end == up)
-                                fprintf(write , "^%s\t", current->tile_name);
-                            if (current->end == down)
-                                fprintf(write , "v%s\t", current->tile_name);
-                            if (current->end == right)
-                                fprintf(write , ">%s\t", current->tile_name);
-                            if (current->end == left)
-                                fprintf(write , "<%s\t", current->tile_name);
-                        }
-                        if (current->status == 0) {
-                            if (current->end == up)
-                                fprintf(write , "^--\t");
-                            if (current->end == down)
-                                fprintf(write , "v--\t");
-                            if (current->end == right)
-                                fprintf(write , ">--\t");
-                            if (current->end == left)
-                                fprintf(write , "<--\t");
-                        }
-                    }
+    fprintf(write , "%d %d %d\n" , Toby , Watson , Sherlock);
+    for (int i = 1; i <= 3; i++) {
+        for (int j = 0; j <= 3; j++) {
+            int count = 0;
+            for (current = head; count < 9; current = current->next) {
+                if ((current->row == i) && (current->column == j)) {
+                    fprintf(write, "%s %d %d %d %d %d %d %d %d %d\n", current->tile_name, current->end, current->status,
+                            current->row, current->column, current->number, current->hour, current->alibi_status,
+                            current->det_vision , current->is_jack);
                     count++;
                 }
-
             }
         }
-        fprintf(write , "\n");
     }
 }
 void file_print_tokens()
@@ -2339,190 +2299,36 @@ void load_selected_game(struct tile *head)
         }
     }
 }
-void read_map(struct tile** head_ref) {
-//    void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co ,int added_tile_count ,int h)
+void read_map(struct tile** head_ref)
+{
     struct tile* nn = (struct tile*) malloc(sizeof(struct tile));
     struct tile *last = *head_ref;
-    int added_tile_count = 0;
-    int margin_count = 0;
-    int tab_count = 0;
-    char c;
-    //first line
-    while (1)
+
+    fscanf(read , "%d" , &Toby);
+    fscanf(read , "%d" , &Watson);
+    fscanf(read , "%d" , &Sherlock);
+    for (int i = 0; i < 9 ; i++)
     {
-        fscanf(read , "%c" , &c);
-        if(c == 'S')
-        {
-            Sherlock = margin_count;
-        }
-        if(c == 'T')
-        {
-            Toby = margin_count;
-        }
-        if(c == 'W')
-        {
-            Sherlock = margin_count;
-        }
-        if(c == '\n')
-        {
-            break;
-        }
+        fscanf(read , "%s" , nn->tile_name);
+        fscanf(read , "%d" , &nn->end);
+        fscanf(read , "%d" , &nn->status);
+        fscanf(read , "%d" , &nn->row);
+        fscanf(read , "%d" , &nn->column);
+        fscanf(read , "%d" , &nn->number);
+        fscanf(read , "%d" , &nn->hour);
+        fscanf(read , "%d" , &nn->alibi_status);
+        fscanf(read , "%d" , &nn->det_vision);
+        fscanf(read , "%d" , &nn->is_jack);
     }
-    //second line
-    for (int i = 0 ; i < 3 ; i++)
+    nn->next = NULL;
+    if (*head_ref == NULL)
     {
-        int ro = 0;
-    while (1) {
-        fscanf(read, "%c", &c);
-        if (c == 'S') {
-            Sherlock = margin_count;
-        }
-        if (c == 'T') {
-            Toby = margin_count;
-        }
-        if (c == 'W') {
-            Sherlock = margin_count;
-        }
-        if (c == '\n') {
-            break;
-        }
-        if (c == '^') {
-            nn->end = up;
-            char s[3];
-            fscanf(read, "%s", s);
-            strcpy(nn->tile_name, s);
-            nn->row = ro;
-            ro++;
-            nn->column = i;
-            nn->status = 1;
-            nn->number = added_tile_count;
-            if(strcmpi(nn->tile_name , "SG") == 0 || strcmpi(nn->tile_name , "IL") == 0)
-                nn->hour = 0;
-            else if(strcmpi(nn->tile_name , "MA") == 0 )
-                nn->hour = 2;
-            else
-                nn->hour = 1;
-            nn->alibi_status = 1;
-            nn->det_vision = 0;
-            nn->next = NULL;
-            if (*head_ref == NULL)
-            {
-                *head_ref = nn;
-                return;
-            }
-            while (last->next != NULL)
-                last = last->next;
-            last->next = nn;
-
-        } else if (c == 'v') {
-            nn->end = down;
-            char s[3];
-            fscanf(read, "%s", s);
-            strcpy(nn->tile_name, s);
-            nn->row = ro;
-            ro++;
-            nn->column = i;
-            nn->status = 1;
-            nn->number = added_tile_count;
-            if(strcmpi(nn->tile_name , "SG") == 0 || strcmpi(nn->tile_name , "IL") == 0)
-                nn->hour = 0;
-            else if(strcmpi(nn->tile_name , "MA") == 0 )
-                nn->hour = 2;
-            else
-                nn->hour = 1;
-            nn->alibi_status = 1;
-            nn->det_vision = 0;
-            nn->next = NULL;
-            if (*head_ref == NULL)
-            {
-                *head_ref = nn;
-                return;
-            }
-            while (last->next != NULL)
-                last = last->next;
-            last->next = nn;
-
-        } else if (c == '<') {
-            nn->end = left;
-            char s[3];
-            fscanf(read, "%s", s);
-            strcpy(nn->tile_name, s);
-            nn->row = ro;
-            ro++;
-            nn->column = i;
-            nn->status = 1;
-            nn->number = added_tile_count;
-            if(strcmpi(nn->tile_name , "SG") == 0 || strcmpi(nn->tile_name , "IL") == 0)
-                nn->hour = 0;
-            else if(strcmpi(nn->tile_name , "MA") == 0 )
-                nn->hour = 2;
-            else
-                nn->hour = 1;
-            nn->alibi_status = 1;
-            nn->det_vision = 0;
-            nn->next = NULL;
-            if (*head_ref == NULL)
-            {
-                *head_ref = nn;
-                return;
-            }
-            while (last->next != NULL)
-                last = last->next;
-            last->next = nn;
-
-        } else if (c == '>') {
-            nn->end = right;
-            char s[3];
-            fscanf(read, "%s", s);
-            strcpy(nn->tile_name, s);
-            nn->row = ro;
-            ro++;
-            nn->column = i;
-            nn->status = 1;
-            nn->number = added_tile_count;
-            if(strcmpi(nn->tile_name , "SG") == 0 || strcmpi(nn->tile_name , "IL") == 0)
-                nn->hour = 0;
-            else if(strcmpi(nn->tile_name , "MA") == 0 )
-                nn->hour = 2;
-            else
-                nn->hour = 1;
-            nn->alibi_status = 1;
-            nn->det_vision = 0;
-            nn->next = NULL;
-            if (*head_ref == NULL)
-            {
-                *head_ref = nn;
-                return;
-            }
-            while (last->next != NULL)
-                last = last->next;
-            last->next = nn;
-
-        }
+        *head_ref = nn;
+        return;
     }
-    }
-    while (1)
-    {
-        fscanf(read , "%c" , &c);
-        if(c == 'S')
-        {
-            Sherlock = margin_count;
-        }
-        if(c == 'T')
-        {
-            Toby = margin_count;
-        }
-        if(c == 'W')
-        {
-            Sherlock = margin_count;
-        }
-        if(c == '\n')
-        {
-            break;
-        }
-    }
-    printmap(head);
-
+    while (last->next != NULL)
+        last = last->next;
+    last->next = nn;
 }
 //void continue_game()
 //{
