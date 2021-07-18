@@ -23,18 +23,13 @@ struct tile{
     int hour; // count hourglasses
     int alibi_status; //shows that the card can be in alibi token1 or not0
     int det_vision; //1 shows that det.s maybe see him
-};struct tile *head = NULL;
+};
 struct action_tokens{
     int rotation_joker;// 0 : rotation , 1 : joker
     int rotation_exchange; // 0 : rotation , 1 : exchange
     int toby_watson; // 0 : toby , 1 : watson
     int sherlock_alibi; // 0 : sherlock , 1 : alibi
 };struct action_tokens tokens;
-struct t
-{
-    struct t *next;
-};
-struct t *h = NULL;
 int turn; // 0detective 1mr.jack
 int rotation_joker_status; //0 for didnt printed
 int rotation_exchange_status;
@@ -99,8 +94,9 @@ char file_name_load[10];
 int name_count =0;
 void loadable_games();
 void load_selected_game(struct tile *head);
-void read_map(struct tile** head_ref);
+struct tile *read_map(struct tile **head_ref);
 void continue_game();
+void print_data(struct tile* head);
 ///////
 int main() {
     start_game_menu();
@@ -108,6 +104,7 @@ int main() {
 }
 void start_game_menu()
 {
+    struct tile *head = NULL;
     int flag = 0;
     printf("1- New Game\n");
     printf("2- Load Game\n");
@@ -133,7 +130,8 @@ void start_game_menu()
     } while (flag == 0);
 }
 void new_game_menu() {
-//        write = fopen("save.txt" , "a+");
+    struct tile *head = NULL;
+        write = fopen("save.txt" , "a+");
         printf("- Please enter the name of this Game:\n");
         fflush(stdin);
         scanf("%s" , game_name);
@@ -426,8 +424,15 @@ void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co ,int add
     nn->status = 1;
     nn->number = added_tile_count;
     nn->hour = h;
-    nn->alibi_status = 1;
+    if(strcmpi(tile_info , MrJacks_real_name_st) == 0)
+        nn->alibi_status = 0;
+    if(strcmpi(tile_info , MrJacks_real_name_st) != 0)
+        nn->alibi_status = 1;
     nn->det_vision = 0;
+    if(strcmpi(tile_info , MrJacks_real_name_st) == 0)
+        nn->is_jack = 1;
+    if(strcmpi(tile_info , MrJacks_real_name_st) != 0)
+        nn->is_jack = 0;
     nn->next = NULL;
     if (*head_ref == NULL)
     {
@@ -2128,14 +2133,11 @@ int jack_win_check(struct tile *head)
 ///////////////////////
 void save_game(struct tile *head)
 {
-    write = fopen("save.txt", "w");
-    if(write == NULL)
-        printf("NULL\n");
-    printf("save game run :\n");
-    fprintf(write , "****");
+//    write = fopen("save.txt", "w");
+//    if(write == NULL)
+//        printf("NULL\n");
     fprintf(write , "%s\n" , game_name);
     fprintf(write , "%d\n" , game_round);
-    fprintf(write , "%s\n" , MrJacks_real_name_st);
     fprintf(write , "%d\n" , hourglass);
     file_print_tokens();
     file_print_map(head);
@@ -2143,18 +2145,21 @@ void save_game(struct tile *head)
 }
 void file_print_map(struct tile *head) {
     struct tile *current;
-    current = head;
-    int margin_count = 1;
-    fprintf(write , "%d %d %d\n" , Toby , Watson , Sherlock);
+    fprintf(write , "%d\n%d\n%d\n" , Toby , Watson , Sherlock);
     for (int i = 1; i <= 3; i++) {
-        for (int j = 0; j <= 3; j++) {
-            int count = 0;
-            for (current = head; count < 9; current = current->next) {
+        for (int j = 1; j <= 3; j++) {
+            for (current = head; current != NULL; current = current->next) {
                 if ((current->row == i) && (current->column == j)) {
-                    fprintf(write, "%s %d %d %d %d %d %d %d %d %d\n", current->tile_name, current->end, current->status,
-                            current->row, current->column, current->number, current->hour, current->alibi_status,
-                            current->det_vision , current->is_jack);
-                    count++;
+                    fprintf(write , "%s " , current->tile_name);
+                    fprintf(write , "%d " , current->end);
+                    fprintf(write , "%d " , current->status);
+                    fprintf(write , "%d " , current->row);
+                    fprintf(write , "%d " , current->column);
+                    fprintf(write , "%d " , current->number);
+                    fprintf(write , "%d " , current->hour);
+                    fprintf(write , "%d " , current->alibi_status);
+                    fprintf(write , "%d " , current->det_vision);
+                    fprintf(write , "%d\n" , current->is_jack);
                 }
             }
         }
@@ -2162,24 +2167,24 @@ void file_print_map(struct tile *head) {
 }
 void file_print_tokens()
 {
-    if(tokens.rotation_joker == 0 && rotation_joker_status == 1)
+    if(tokens.rotation_joker == 0)
         fprintf(write , "rotation1\n");
-    if(tokens.rotation_joker == 1 && rotation_joker_status == 1)
+    if(tokens.rotation_joker == 1)
         fprintf(write , "joker\n");
 
-    if(tokens.rotation_exchange == 0 && rotation_exchange_status == 1)
+    if(tokens.rotation_exchange == 0)
         fprintf(write , "rotation2\n");
-    if(tokens.rotation_exchange == 1 && rotation_exchange_status == 1)
+    if(tokens.rotation_exchange == 1)
         fprintf(write , "exchange\n");
 
-    if(tokens.toby_watson == 0 && toby_watson_status == 1)
+    if(tokens.toby_watson == 0)
         fprintf(write , "toby\n");
-    if(tokens.toby_watson == 1 && toby_watson_status == 1)
+    if(tokens.toby_watson == 1)
         fprintf(write , "watson\n");
 
-    if(tokens.sherlock_alibi == 0 && sherlock_alibi_status == 1)
+    if(tokens.sherlock_alibi == 0)
         fprintf(write , "sherlock\n");
-    if(tokens.sherlock_alibi == 1 && sherlock_alibi_status == 1)
+    if(tokens.sherlock_alibi == 1)
         fprintf(write , "alibi\n");
 }
 void load_game(struct tile *head)
@@ -2190,7 +2195,8 @@ void load_game(struct tile *head)
     fflush(stdin);
     scanf("%s" , file_name_load);
     load_selected_game(head);
-    printmap(head);
+
+//    print_data(head);
 }
 void loadable_games()
 {
@@ -2214,49 +2220,39 @@ void loadable_games()
     for (int i = 0 ; i < name_count ; i++)
         printf("%dth : %s\n" ,i ,  file_games[i]);
 }
-void load_selected_game(struct tile *head)
-{
+void load_selected_game(struct tile *head) {
     int file_game_round;
     rewind(read);
-    char c ;
-    while (feof(read) == 0)
-    {
-        char st[15] ;
-        fscanf(read , "%s" , st);
-        if(strcmpi(st , file_name_load) == 0)
-        {
-            fscanf(read , "%d" , &file_game_round);
+    char c;
+    while (feof(read) == 0) {
+        char st[15];
+        fscanf(read, "%s", st);
+        if (strcmpi(st, file_name_load) == 0) {
+            fscanf(read, "%d", &file_game_round);
 //            printf("game round = %d\n" , file_game_round);
-        }
-
-        int flag = 0;
-        while (flag == 0)
-        {
-            fscanf(read , "%c" , &c);
-            if(c == '*')
-            {
-                flag = 1;
+        } else {
+            int flag = 0;
+            while (flag == 0) {
+                fscanf(read, "%c", &c);
+                if (c == '*') {
+                    flag = 1;
+                }
             }
         }
     }
 
     rewind(read);
     int x;
-    while (feof(read) == 0)
-    {
-        char st[15]  , tok[10];
-        fscanf(read , "%s" , st);
-        if(strcmpi(st , file_name_load) == 0)
-        {
-            fscanf(read , "%d" , &x);
-            if(x == file_game_round)
-            {
-                printf("round %d\n" , file_game_round);
-                fscanf(read , "%s" , MrJacks_real_name_st);
-                printf("mr jack's real name : %s\n" , MrJacks_real_name_st);
-                fscanf(read , "%d\n" , &hourglass);
-                printf("hg = %d\n" , hourglass);
-                for (int k = 0 ; k < 4 ; k++) {
+    while (feof(read) == 0) {
+        char st[15], tok[10];
+        fscanf(read, "%s", st);
+        if (strcmpi(st, file_name_load) == 0) {
+            fscanf(read, "%d", &x);
+            if (x == file_game_round) {
+//                printf("round %d\n", file_game_round);
+                fscanf(read, "%d\n", &hourglass);
+//                printf("hg = %d\n", hourglass);
+                for (int k = 0; k < 4; k++) {
                     fscanf(read, "%s", tok);
                     if (strcmpi(tok, "rotation1") == 0) {
                         rotation_joker_status = 1;
@@ -2282,55 +2278,173 @@ void load_selected_game(struct tile *head)
                     if (strcmpi(tok, "alibi") == 0) {
                         sherlock_alibi_status = 0;
                     }
-                    printf("tok : %s\n" , tok);
+//                    printf("tok : %s\n", tok);
                 }
-                read_map(&head);
-                return;
+                fscanf(read, "%d", &Toby);
+                fscanf(read, "%d", &Watson);
+                fscanf(read, "%d", &Sherlock);
+                for (int i = 0; i < 9; i++) {
+                    read_map(&head);
+                }
+//                if (head == NULL)
+//                    printf("NULL HEAD\n");
+                struct tile *current;
+                /////////////START GAME////////////////////////////////
+                printmap(head);
+                strcpy(game_name , file_name_load);
+                for (game_round = file_game_round + 1; game_round < 9; game_round++) {
+                    for (current = head; current != NULL; current = current->next) {
+                        current->det_vision = 0;
+                    }
+                    rotation_joker_status = 0;
+                    rotation_exchange_status = 0;
+                    sherlock_alibi_status = 0;
+                    toby_watson_status = 0;
+                    printf("- - - - - - - - - - - - - - -\n-%dth ROUND-\n- - - - - - - - - - - - - - -\n", game_round);
+                    if (game_round % 2 == 0) {
+                        token2();
+                    }
+                    if (game_round % 2 == 1) {
+                        token1();
+                    }
+                    if (game_round % 2 == 0) {
+                        printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+                        turn = 1;
+                    }
+                    if (game_round % 2 == 1) {
+                        printf("Detective! pls choose one token and enter its name as a string : \n");
+                        turn = 0;
+                    }
+                    choose_token(head);
+                    printmap(head);
+                    if (detective_win_check(head) == 1)
+                        main();
+                    ////////////
+                    token_print_notes();
+                    if (game_round % 2 == 0) {
+                        printf("Detective! pls choose one token and enter its name as a string : \n");
+                        turn = 0;
+                    }
+                    if (game_round % 2 == 1) {
+                        printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+                        turn = 1;
+                    }
+                    choose_token(head);
+                    printmap(head);
+                    if (detective_win_check(head) == 1)
+                        main();
+                    /////////////
+                    token_print_notes();
+                    if (game_round % 2 == 0) {
+                        printf("Detective! pls choose one token and enter its name as a string : \n");
+                        turn = 0;
+                    }
+                    if (game_round % 2 == 1) {
+                        printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+                        turn = 1;
+                    }
+                    choose_token(head);
+                    printmap(head);
+                    if (detective_win_check(head) == 1)
+                        main();
+                    //////////
+                    token_print_notes();
+                    if (game_round % 2 == 0) {
+                        printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+                        turn = 1;
+                    }
+                    if (game_round % 2 == 1) {
+                        printf("Detective! pls choose one token and enter its name as a string : \n");
+                        turn = 0;
+                    }
+                    choose_token(head);
+                    printf("- - - - - - - - - - - - - - -\n");
+                    printmap(head);
+                    can_see(head);
+                    printmap(head);
+                    if (detective_win_check(head) == 1)
+                        main();
+                    if (jack_win_check(head) == 1)
+                        main();
+                    if (game_round == 8) {
+                        printf("* * * * * * * * * * * *\n\n");
+                        printf("congratulations!!!\nMR.JACK IS WINNER!\n\n");
+                        printf(" * * * * * * * * * * * *\n\n");
+                        main();
+                    }
+                    printf("enter 'SAVE' to save game:\n");
+                    printf("if you don't want to save game , enter another character:\n");
+                    char SaveChar[10];
+                    fflush(stdin);
+                    scanf("%s", SaveChar);
+                    if (strcmpi(SaveChar, "save") == 0) {
+                        fprintf(write , "%s\n" , game_name);
+                        fprintf(write , "%d\n" , game_round);
+                        fprintf(write , "%d\n" , hourglass);
+                        file_print_tokens();
+                        file_print_map(head);
+                        fprintf(write , "*\n");
+                        printf("1 for return\n");
+                        int ret;
+                        scanf("%d", &ret);
+                        if (ret == 1)
+                            return;
+                    }
+                    return;
+                }
             }
-        }
-        int flag = 0;
-        while (flag == 0)
-        {
-            fscanf(read , "%c" , &c);
-            if(c == '*')
-            {
-                flag = 1;
+            ////////////////////////////////////////////////////////
+            int flag = 0;
+            while (flag == 0) {
+                fscanf(read, "%c", &c);
+                if (c == '*') {
+                    flag = 1;
+                }
             }
         }
     }
 }
-void read_map(struct tile** head_ref)
+struct tile *read_map(struct tile **head_ref)
 {
     struct tile* nn = (struct tile*) malloc(sizeof(struct tile));
     struct tile *last = *head_ref;
-
-    fscanf(read , "%d" , &Toby);
-    fscanf(read , "%d" , &Watson);
-    fscanf(read , "%d" , &Sherlock);
-    for (int i = 0; i < 9 ; i++)
-    {
-        fscanf(read , "%s" , nn->tile_name);
-        fscanf(read , "%d" , &nn->end);
-        fscanf(read , "%d" , &nn->status);
-        fscanf(read , "%d" , &nn->row);
-        fscanf(read , "%d" , &nn->column);
-        fscanf(read , "%d" , &nn->number);
-        fscanf(read , "%d" , &nn->hour);
-        fscanf(read , "%d" , &nn->alibi_status);
-        fscanf(read , "%d" , &nn->det_vision);
-        fscanf(read , "%d" , &nn->is_jack);
-    }
+    fscanf(read , "%s" , nn->tile_name );
+    fscanf(read , "%d" , &nn->end);
+    fscanf(read , "%d" , &nn->status);
+    fscanf(read , "%d" , &nn->row);
+    fscanf(read , "%d" , &nn->column);
+    fscanf(read , "%d" , &nn->number);
+    fscanf(read , "%d" , &nn->hour);
+    fscanf(read , "%d" , &nn->alibi_status);
+    fscanf(read , "%d" , &nn->det_vision);
+    fscanf(read , "%d" , &nn->is_jack);
     nn->next = NULL;
     if (*head_ref == NULL)
     {
         *head_ref = nn;
-        return;
+        return nn;
     }
     while (last->next != NULL)
         last = last->next;
     last->next = nn;
+    return nn;
+
 }
-//void continue_game()
-//{
-//
-//}
+void print_data(struct tile *head)
+{
+    printf("print data\n");
+    struct tile *nn;
+    for (nn = head ; nn != NULL ; nn = nn ->next) {
+        printf("hi\n");
+        printf("%s ", nn->tile_name);
+        printf("%d ", nn->end);
+        printf("%d ", nn->status);
+        printf("%d ", nn->row);
+        printf("%d ", nn->column);
+        printf("%d ", nn->number);
+        printf("%d ", nn->hour);
+        printf("%d ", nn->alibi_status);
+        printf("%d ", nn->det_vision);
+        printf("%d\n", nn->is_jack);
+    }
+}
