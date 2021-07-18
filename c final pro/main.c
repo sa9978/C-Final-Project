@@ -10,11 +10,8 @@
 //enum tile_name{InspLestrade = 1 , JeremyBert , JohnPizer , JohnSmith , JosephLane , Madame , MissStealthy , SgtGoodley , WiliamGull}; // from 1 to 9
 enum tile_street{up = 1 , right , down , left};
 FILE *write;
+FILE *read;
 struct tile{
-//    struct tile *right;
-//    struct tile *left;
-//    struct tile *up;
-//    struct tile *down;
     struct tile *next;
     int row;
     int column;
@@ -26,7 +23,7 @@ struct tile{
     int hour; // count hourglasses
     int alibi_status; //shows that the card can be in alibi token1 or not0
     int det_vision; //1 shows that det.s maybe see him
-};
+};struct tile *head = NULL;
 struct action_tokens{
     int rotation_joker;// 0 : rotation , 1 : joker
     int rotation_exchange; // 0 : rotation , 1 : exchange
@@ -50,14 +47,17 @@ int Toby; //8*2 rounds + 1  for first situation + 1
 int Sherlock;
 int Watson;
 char MrJacks_real_name_st[3];
+int MrJacks_real_name;
 int tiles_array_check_repitition[10];
 int round_part;
 char game_name[30];
 int first_player_role , second_player_role; //1 for mr jack and 0 fo detective
 void start_game_menu();
 void new_game_menu();
+void choose_new_game();
 void random_tiles_at_first_time();
 void printmap(struct tile *head);
+void choose_mr_jack();
 void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co , int added_tile_count , int h);
 void detectives_places();
 void token1();
@@ -86,110 +86,91 @@ int rotate_tile_cant_see(struct tile *head , int location);
 int vision_can_see(struct tile *head , int location);
 int detective_win_check(struct tile *head);
 int jack_win_check(struct tile *head);
+///////////
+//////save and load
+/////////
+void save_game(struct tile *head);
+void file_print_map(struct tile *head);
+void file_print_tokens();
+
+void load_game(struct tile *head);
+char file_games[10][15] ;
+char file_name_load[10];
+int name_count =0;
+void loadable_games();
+void load_selected_game(struct tile *head);
+void read_map(struct tile** head_ref);
+void continue_game();
+///////
 int main() {
     start_game_menu();
     return 0;
 }
 void start_game_menu()
 {
+    int flag = 0;
     printf("1- New Game\n");
     printf("2- Load Game\n");
     printf("3- Exit\n");
     fflush(stdin);
-    scanf("%d" , &start_key);
-    if (start_key == 1)
-        new_game_menu();
+    do {
+        scanf("%d", &start_key);
+        if (start_key == 1)
+        {
+            new_game_menu();
+            flag = 1;
+        }
+        if (start_key == 2)
+        {
+            load_game(head);
+            flag = 1;
+        }
+
+        if(flag == 0)
+        {
+            printf("pls enter a valid number between 1 & 3:\n");
+        }
+    } while (flag == 0);
 }
 void new_game_menu() {
-//    do {
-//        printf("- Please enter the name of this Game:\n");
-//        getchar();
-//        gets(game_name);
-////        write = fopen(game_name, "w");
-//        if (write == NULL) {
-//            printf("Error / pls try again\n");
-//        }
-//    } while (write == NULL);
-//    int flag_name = 0;
-//    do {
-//        printf("- Choose which role you want to play? (Mr.Jack/Detective)\n");
-//        char role[30];
-//        fflush(stdin);
-//        scanf("%s", role);
-//        if (strcmpi(role, "Mr.Jack") == 0) {
-//            first_player_role = 1;
-//            second_player_role = 0;
-//            printf("the first player is : Mr.Jack\n& the second payer is :Detective\n");
-//            flag_name = 1;
-//        }
-//        if (strcmpi(role, "Detective") == 0) {
-//            first_player_role = 0;
-//            second_player_role = 1;
-//            printf("the first player is : Detective\n& the second payer is :Mr.Jack\n");
-//            flag_name = 1;
-//        }
-//        if (flag_name == 0)
-//            printf("pls enter a valid name!\n");
-//    } while (flag_name == 0);
-//    int close_eye;
-//    printf("- Mr.Jack's identity will be defined. if the detective close his/her eyes , mr jack enter '1'\n");
-//    do {
-//      fflush(stdin);
-//        scanf("%d", &close_eye);
-//        if (close_eye != 1)
-//            printf("DON'T CHEAT!!! CLOSE YOUR EYES!\nmr jack! if he/she closed his/her eyes enter '1'\n");
-//    } while (close_eye != 1);
-//
-//
-    srand(time(0));
-    int MrJacks_real_name = rand() % (9 - 1 + 1) + 1;
-    if (MrJacks_real_name == 1) {
-//        MrJacks_real_name = InspLestrade;
-        strcpy(MrJacks_real_name_st, "IL");
-        printf("MrJack's real name is InspLestrade, we call him in the game 'IL' \n");
-    }
-    if (MrJacks_real_name == 2) {
-//        MrJacks_real_name = JeremyBert;
-        strcpy(MrJacks_real_name_st, "JB");
-        printf("MrJack's real name is JeremyBert, we call him in the game 'JB' \n");
-    }
-    if (MrJacks_real_name == 3) {
-//        MrJacks_real_name = JohnPizer;
-        strcpy(MrJacks_real_name_st, "JP");
-        printf("MrJack's real name is JohnPizer, we call him in the game 'JP' \n");
-    }
-    if (MrJacks_real_name == 4) {
-//        MrJacks_real_name = JohnSmith;
-        strcpy(MrJacks_real_name_st, "JS");
-        printf("MrJack's real name is JohnSmith, we call him in the game 'JS' \n");
-    }
-    if (MrJacks_real_name == 5) {
-//        MrJacks_real_name = JosephLane;
-        strcpy(MrJacks_real_name_st, "JL");
-        printf("MrJack's real name is JosephLane, we call him in the game 'JL' \n");
-    }
-    if (MrJacks_real_name == 6) {
-        strcpy(MrJacks_real_name_st, "MA");
-        printf("MrJack's real name is Madame, we call her in the game 'MA' \n");
-    }
-    if (MrJacks_real_name == 7) {
-//        MrJacks_real_name = MissStealthy;
-        strcpy(MrJacks_real_name_st, "MS");
-        printf("MrJack's real name is MissStealthy, we call her in the game 'MS' \n");
-    }
-    if (MrJacks_real_name == 8) {
-//        MrJacks_real_name = SgtGoodley;
-        strcpy(MrJacks_real_name_st, "SG");
-        printf("MrJack's real name is SgtGoodley, we call him in the game 'SG' \n");
-    }
-    if (MrJacks_real_name == 9) {
-//        MrJacks_real_name = WiliamGull;
-        strcpy(MrJacks_real_name_st, "WG");
-        printf("MrJack's real name is WiliamGull, we call him in the game 'WG' \n");
-    }
+        write = fopen("save.txt" , "a+");
+        printf("- Please enter the name of this Game:\n");
+        fflush(stdin);
+        scanf("%s" , game_name);
+
+    int flag_name = 0;
+    do {
+        printf("- Choose which role you want to play? (Mr.Jack/Detective)\n");
+        char role[30];
+        fflush(stdin);
+        scanf("%s", role);
+        if (strcmpi(role, "Mr.Jack") == 0) {
+            first_player_role = 1;
+            second_player_role = 0;
+            printf("the first player is : Mr.Jack\n& the second payer is :Detective\n");
+            flag_name = 1;
+        }
+        if (strcmpi(role, "Detective") == 0) {
+            first_player_role = 0;
+            second_player_role = 1;
+            printf("the first player is : Detective\n& the second payer is :Mr.Jack\n");
+            flag_name = 1;
+        }
+        if (flag_name == 0)
+            printf("pls enter a valid name!\n");
+    } while (flag_name == 0);
+    int close_eye;
+    printf("- Mr.Jack's identity will be defined. if the detective close his/her eyes , mr jack enter '1'\n");
+    do {
+      fflush(stdin);
+        scanf("%d", &close_eye);
+        if (close_eye != 1)
+            printf("DON'T CHEAT!!! CLOSE YOUR EYES!\nmr jack! if he/she closed his/her eyes enter '1'\n");
+    } while (close_eye != 1);
+
+    choose_mr_jack();
     random_tiles_at_first_time();
     int added_tiles_count = 0;
-    struct tile *head = NULL;
     char tile_info[3];
     int h;
     for (int i = 1; i <= 3; i++) {
@@ -341,7 +322,69 @@ void new_game_menu() {
             printf(" * * * * * * * * * * * *\n\n");
             main();
         }
+        printf("enter 'SAVE' to save game:\n");
+        printf("if you don't want to save game , enter another character:\n");
+        char SaveChar[10];
+        fflush(stdin);
+        scanf("%s" , SaveChar);
+        if (strcmpi(SaveChar , "save") == 0) {
+            save_game(head);
+            printf("return?\n");
+            int ret;
+            scanf("%d" , &ret);
+            if (ret == 1)
+                return;
+        }
 //    fclose(write);
+    }
+}
+void choose_mr_jack()
+{
+    srand(time(0));
+    MrJacks_real_name = rand() % (9 - 1 + 1) + 1;
+    if (MrJacks_real_name == 1) {
+//        MrJacks_real_name = InspLestrade;
+        strcpy(MrJacks_real_name_st, "IL");
+        printf("MrJack's real name is InspLestrade, we call him in the game 'IL' \n");
+    }
+    if (MrJacks_real_name == 2) {
+//        MrJacks_real_name = JeremyBert;
+        strcpy(MrJacks_real_name_st, "JB");
+        printf("MrJack's real name is JeremyBert, we call him in the game 'JB' \n");
+    }
+    if (MrJacks_real_name == 3) {
+//        MrJacks_real_name = JohnPizer;
+        strcpy(MrJacks_real_name_st, "JP");
+        printf("MrJack's real name is JohnPizer, we call him in the game 'JP' \n");
+    }
+    if (MrJacks_real_name == 4) {
+//        MrJacks_real_name = JohnSmith;
+        strcpy(MrJacks_real_name_st, "JS");
+        printf("MrJack's real name is JohnSmith, we call him in the game 'JS' \n");
+    }
+    if (MrJacks_real_name == 5) {
+//        MrJacks_real_name = JosephLane;
+        strcpy(MrJacks_real_name_st, "JL");
+        printf("MrJack's real name is JosephLane, we call him in the game 'JL' \n");
+    }
+    if (MrJacks_real_name == 6) {
+        strcpy(MrJacks_real_name_st, "MA");
+        printf("MrJack's real name is Madame, we call her in the game 'MA' \n");
+    }
+    if (MrJacks_real_name == 7) {
+//        MrJacks_real_name = MissStealthy;
+        strcpy(MrJacks_real_name_st, "MS");
+        printf("MrJack's real name is MissStealthy, we call her in the game 'MS' \n");
+    }
+    if (MrJacks_real_name == 8) {
+//        MrJacks_real_name = SgtGoodley;
+        strcpy(MrJacks_real_name_st, "SG");
+        printf("MrJack's real name is SgtGoodley, we call him in the game 'SG' \n");
+    }
+    if (MrJacks_real_name == 9) {
+//        MrJacks_real_name = WiliamGull;
+        strcpy(MrJacks_real_name_st, "WG");
+        printf("MrJack's real name is WiliamGull, we call him in the game 'WG' \n");
     }
 }
 void random_tiles_at_first_time()
@@ -2074,3 +2117,414 @@ int jack_win_check(struct tile *head)
     }
     return 0;
 }
+///////////////////////////
+
+//////////////////////////
+
+//////save and load//////
+
+////////////////////////
+
+///////////////////////
+void save_game(struct tile *head)
+{
+    fprintf(write , "%s\n" , game_name);
+    fprintf(write , "%d\n" , game_round);
+    fprintf(write , "%s\n" , MrJacks_real_name_st);
+    fprintf(write , "%d\n" , hourglass);
+    file_print_tokens();
+    file_print_map(head);
+    fprintf(write , "*\n");
+}
+void file_print_map(struct tile *head)
+{
+    struct tile *current;
+    current = head;
+    int margin_count = 1;
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (j == 0 || j == 4 || i == 0 || i == 4) {
+                if ((j == 0 && i == 0) || (i == 0 & j == 4) || (i == 4 && j == 0) || (i == 4 && j == 4))
+                   fprintf(write , "  \t");
+                else {
+                    int f = 0;
+                    if (Toby == margin_count) {
+                        fprintf(write , "T");
+                        f = 1;
+                    }
+                    if (Sherlock == margin_count) {
+                        fprintf(write ,"S");
+                        f = 1;
+                    }
+                    if (Watson == margin_count) {
+                        fprintf(write , "W");
+                        f = 1;
+                    }
+                    if (f == 1)
+                        fprintf(write , "\t");
+                    else
+                        fprintf(write , "  \t");
+                    margin_count++;
+                }
+
+            } else {
+                int count = 0;
+                for (current = head; count < 9; current = current->next) {
+                    if ((current->row == i) && (current->column == j)) {
+                        if (current->status == 1) {
+                            if (current->end == up)
+                                fprintf(write , "^%s\t", current->tile_name);
+                            if (current->end == down)
+                                fprintf(write , "v%s\t", current->tile_name);
+                            if (current->end == right)
+                                fprintf(write , ">%s\t", current->tile_name);
+                            if (current->end == left)
+                                fprintf(write , "<%s\t", current->tile_name);
+                        }
+                        if (current->status == 0) {
+                            if (current->end == up)
+                                fprintf(write , "^--\t");
+                            if (current->end == down)
+                                fprintf(write , "v--\t");
+                            if (current->end == right)
+                                fprintf(write , ">--\t");
+                            if (current->end == left)
+                                fprintf(write , "<--\t");
+                        }
+                    }
+                    count++;
+                }
+
+            }
+        }
+        fprintf(write , "\n");
+    }
+}
+void file_print_tokens()
+{
+    if(tokens.rotation_joker == 0 && rotation_joker_status == 1)
+        fprintf(write , "rotation1\n");
+    if(tokens.rotation_joker == 1 && rotation_joker_status == 1)
+        fprintf(write , "joker\n");
+
+    if(tokens.rotation_exchange == 0 && rotation_exchange_status == 1)
+        fprintf(write , "rotation2\n");
+    if(tokens.rotation_exchange == 1 && rotation_exchange_status == 1)
+        fprintf(write , "exchange\n");
+
+    if(tokens.toby_watson == 0 && toby_watson_status == 1)
+        fprintf(write , "toby\n");
+    if(tokens.toby_watson == 1 && toby_watson_status == 1)
+        fprintf(write , "watson\n");
+
+    if(tokens.sherlock_alibi == 0 && sherlock_alibi_status == 1)
+        fprintf(write , "sherlock\n");
+    if(tokens.sherlock_alibi == 1 && sherlock_alibi_status == 1)
+        fprintf(write , "alibi\n");
+}
+void load_game(struct tile *head)
+{
+    read = fopen("save.txt" , "r");
+    printf("pls enter the name:\n");
+    loadable_games();
+    fflush(stdin);
+    scanf("%s" , file_name_load);
+    load_selected_game(head);
+    printmap(head);
+}
+void loadable_games()
+{
+    rewind(read);
+    char c ;
+    while (feof(read) == 0)
+    {
+        int flag = 0;
+        fscanf(read , "%s" , file_games[name_count]);
+        name_count++;
+        while (flag == 0)
+        {
+            fscanf(read , "%c" , &c);
+            if(c == '*')
+            {
+                flag = 1;
+            }
+        }
+    }
+    name_count = name_count - 1;
+    for (int i = 0 ; i < name_count ; i++)
+        printf("%dth : %s\n" ,i ,  file_games[i]);
+}
+void load_selected_game(struct tile *head)
+{
+    int file_game_round;
+    rewind(read);
+    char c ;
+    while (feof(read) == 0)
+    {
+        char st[15] ;
+        fscanf(read , "%s" , st);
+        if(strcmpi(st , file_name_load) == 0)
+        {
+            fscanf(read , "%d" , &file_game_round);
+//            printf("game round = %d\n" , file_game_round);
+        }
+
+        int flag = 0;
+        while (flag == 0)
+        {
+            fscanf(read , "%c" , &c);
+            if(c == '*')
+            {
+                flag = 1;
+            }
+        }
+    }
+
+    rewind(read);
+    int x;
+    while (feof(read) == 0)
+    {
+        char st[15]  , tok[10];
+        fscanf(read , "%s" , st);
+        if(strcmpi(st , file_name_load) == 0)
+        {
+            fscanf(read , "%d" , &x);
+            if(x == file_game_round)
+            {
+                printf("round %d\n" , file_game_round);
+                fscanf(read , "%s" , MrJacks_real_name_st);
+                printf("mr jack's real name : %s\n" , MrJacks_real_name_st);
+                fscanf(read , "%d\n" , &hourglass);
+                printf("hg = %d\n" , hourglass);
+                for (int k = 0 ; k < 4 ; k++) {
+                    fscanf(read, "%s", tok);
+                    if (strcmpi(tok, "rotation1") == 0) {
+                        rotation_joker_status = 1;
+                    }
+                    if (strcmpi(tok, "rotation2") == 0) {
+                        rotation_exchange_status = 1;
+                    }
+                    if (strcmpi(tok, "joker") == 0) {
+                        rotation_joker_status = 1;
+                    }
+                    if (strcmpi(tok, "toby") == 0) {
+                        toby_watson_status = 1;
+                    }
+                    if (strcmpi(tok, "watson") == 0) {
+                        toby_watson_status = 0;
+                    }
+                    if (strcmpi(tok, "sherlock") == 0) {
+                        sherlock_alibi_status = 1;
+                    }
+                    if (strcmpi(tok, "exchange") == 0) {
+                        rotation_exchange_status = 0;
+                    }
+                    if (strcmpi(tok, "alibi") == 0) {
+                        sherlock_alibi_status = 0;
+                    }
+                    printf("tok : %s\n" , tok);
+                }
+                read_map(&head);
+                return;
+            }
+        }
+        int flag = 0;
+        while (flag == 0)
+        {
+            fscanf(read , "%c" , &c);
+            if(c == '*')
+            {
+                flag = 1;
+            }
+        }
+    }
+}
+void read_map(struct tile** head_ref) {
+//    void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co ,int added_tile_count ,int h)
+    struct tile* nn = (struct tile*) malloc(sizeof(struct tile));
+    struct tile *last = *head_ref;
+    int added_tile_count = 0;
+    int margin_count = 0;
+    int tab_count = 0;
+    char c;
+    //first line
+    while (1)
+    {
+        fscanf(read , "%c" , &c);
+        if(c == 'S')
+        {
+            Sherlock = margin_count;
+        }
+        if(c == 'T')
+        {
+            Toby = margin_count;
+        }
+        if(c == 'W')
+        {
+            Sherlock = margin_count;
+        }
+        if(c == '\n')
+        {
+            break;
+        }
+    }
+    //second line
+    for (int i = 0 ; i < 3 ; i++)
+    {
+        int ro = 0;
+    while (1) {
+        fscanf(read, "%c", &c);
+        if (c == 'S') {
+            Sherlock = margin_count;
+        }
+        if (c == 'T') {
+            Toby = margin_count;
+        }
+        if (c == 'W') {
+            Sherlock = margin_count;
+        }
+        if (c == '\n') {
+            break;
+        }
+        if (c == '^') {
+            nn->end = up;
+            char s[3];
+            fscanf(read, "%s", s);
+            strcpy(nn->tile_name, s);
+            nn->row = ro;
+            ro++;
+            nn->column = i;
+            nn->status = 1;
+            nn->number = added_tile_count;
+            if(strcmpi(nn->tile_name , "SG") == 0 || strcmpi(nn->tile_name , "IL") == 0)
+                nn->hour = 0;
+            else if(strcmpi(nn->tile_name , "MA") == 0 )
+                nn->hour = 2;
+            else
+                nn->hour = 1;
+            nn->alibi_status = 1;
+            nn->det_vision = 0;
+            nn->next = NULL;
+            if (*head_ref == NULL)
+            {
+                *head_ref = nn;
+                return;
+            }
+            while (last->next != NULL)
+                last = last->next;
+            last->next = nn;
+
+        } else if (c == 'v') {
+            nn->end = down;
+            char s[3];
+            fscanf(read, "%s", s);
+            strcpy(nn->tile_name, s);
+            nn->row = ro;
+            ro++;
+            nn->column = i;
+            nn->status = 1;
+            nn->number = added_tile_count;
+            if(strcmpi(nn->tile_name , "SG") == 0 || strcmpi(nn->tile_name , "IL") == 0)
+                nn->hour = 0;
+            else if(strcmpi(nn->tile_name , "MA") == 0 )
+                nn->hour = 2;
+            else
+                nn->hour = 1;
+            nn->alibi_status = 1;
+            nn->det_vision = 0;
+            nn->next = NULL;
+            if (*head_ref == NULL)
+            {
+                *head_ref = nn;
+                return;
+            }
+            while (last->next != NULL)
+                last = last->next;
+            last->next = nn;
+
+        } else if (c == '<') {
+            nn->end = left;
+            char s[3];
+            fscanf(read, "%s", s);
+            strcpy(nn->tile_name, s);
+            nn->row = ro;
+            ro++;
+            nn->column = i;
+            nn->status = 1;
+            nn->number = added_tile_count;
+            if(strcmpi(nn->tile_name , "SG") == 0 || strcmpi(nn->tile_name , "IL") == 0)
+                nn->hour = 0;
+            else if(strcmpi(nn->tile_name , "MA") == 0 )
+                nn->hour = 2;
+            else
+                nn->hour = 1;
+            nn->alibi_status = 1;
+            nn->det_vision = 0;
+            nn->next = NULL;
+            if (*head_ref == NULL)
+            {
+                *head_ref = nn;
+                return;
+            }
+            while (last->next != NULL)
+                last = last->next;
+            last->next = nn;
+
+        } else if (c == '>') {
+            nn->end = right;
+            char s[3];
+            fscanf(read, "%s", s);
+            strcpy(nn->tile_name, s);
+            nn->row = ro;
+            ro++;
+            nn->column = i;
+            nn->status = 1;
+            nn->number = added_tile_count;
+            if(strcmpi(nn->tile_name , "SG") == 0 || strcmpi(nn->tile_name , "IL") == 0)
+                nn->hour = 0;
+            else if(strcmpi(nn->tile_name , "MA") == 0 )
+                nn->hour = 2;
+            else
+                nn->hour = 1;
+            nn->alibi_status = 1;
+            nn->det_vision = 0;
+            nn->next = NULL;
+            if (*head_ref == NULL)
+            {
+                *head_ref = nn;
+                return;
+            }
+            while (last->next != NULL)
+                last = last->next;
+            last->next = nn;
+
+        }
+    }
+    }
+    while (1)
+    {
+        fscanf(read , "%c" , &c);
+        if(c == 'S')
+        {
+            Sherlock = margin_count;
+        }
+        if(c == 'T')
+        {
+            Toby = margin_count;
+        }
+        if(c == 'W')
+        {
+            Sherlock = margin_count;
+        }
+        if(c == '\n')
+        {
+            break;
+        }
+    }
+    printmap(head);
+
+}
+//void continue_game()
+//{
+//
+//}
