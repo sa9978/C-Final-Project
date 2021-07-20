@@ -31,6 +31,7 @@ struct action_tokens{
     int sherlock_alibi; // 0 : sherlock , 1 : alibi
 };struct action_tokens tokens;
 int turn; // 0detective 1mr.jack
+int GR;
 int rotation_joker_status; //0 for didnt printed
 int rotation_exchange_status;
 int toby_watson_status;
@@ -47,6 +48,7 @@ int tiles_array_check_repitition[10];
 int round_part;
 char game_name[30];
 int first_player_role , second_player_role; //1 for mr jack and 0 fo detective
+char computer[3]; //mr  de
 void start_game_menu();
 void new_game_menu();
 void choose_new_game();
@@ -81,6 +83,7 @@ int rotate_tile_cant_see(struct tile *head , int location);
 int vision_can_see(struct tile *head , int location);
 int detective_win_check(struct tile *head);
 int jack_win_check(struct tile *head);
+void start_game(struct tile *head);
 ///////////
 //////save and load
 /////////
@@ -97,6 +100,12 @@ void load_selected_game(struct tile *head);
 struct tile *read_map(struct tile **head_ref);
 void continue_game();
 void print_data(struct tile* head);
+
+/////
+void duel();
+void start_game_duel(struct tile *head);
+void choose_token_duel(struct tile *head);
+int comp; //comp's turn 1       player's turn0
 ///////
 int main() {
     start_game_menu();
@@ -106,9 +115,10 @@ void start_game_menu()
 {
     struct tile *head = NULL;
     int flag = 0;
-    printf("1- New Game\n");
-    printf("2- Load Game\n");
-    printf("3- Exit\n");
+    printf("1- New Game (Solo)\n");
+    printf("2- New Game (Duel)\n");
+    printf("3- Load Game\n");
+    printf("4- Exit\n");
     fflush(stdin);
     do {
         scanf("%d", &start_key);
@@ -119,13 +129,19 @@ void start_game_menu()
         }
         if (start_key == 2)
         {
+            duel();
+            flag = 1;
+        }
+        if (start_key == 3)
+        {
             load_game(head);
             flag = 1;
         }
+        if (start_key == 4)
 
         if(flag == 0)
         {
-            printf("pls enter a valid number between 1 & 3:\n");
+            printf("pls enter a valid number between 1 & 4:\n");
         }
     } while (flag == 0);
 }
@@ -226,116 +242,11 @@ void new_game_menu() {
         Watson = 5;
         Sherlock = 4;
     }
-    struct tile *current;
-    printmap(head);
-
-    printf("if you are ready , pls enter a character to start the game!\n");
-    char start_char;
-    getchar();
-    fflush(stdin);
-    scanf("%c" , &start_char);
-    char choice[10];
-//    int round_part; //an integer between 0 & 1
-
-
-    for (game_round = 1; game_round < 9; game_round++) {
-        for (current = head ; current!= NULL ; current= current->next)
-        {
-            current->det_vision = 0;
-        }
-        rotation_joker_status = 0;
-        rotation_exchange_status = 0;
-        sherlock_alibi_status = 0;
-        toby_watson_status = 0;
-        printf("- - - - - - - - - - - - - - -\n-%dth ROUND-\n- - - - - - - - - - - - - - -\n", game_round);
-        if (game_round % 2 == 0) {
-            token2();
-        }
-        if (game_round % 2 == 1) {
-            token1();
-        }
-        if (game_round % 2 == 0) {
-            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-            turn = 1;
-        }
-        if (game_round % 2 == 1) {
-            printf("Detective! pls choose one token and enter its name as a string : \n");
-            turn = 0;
-        }
-        choose_token( head );
-        printmap(head);
-        if(detective_win_check(head) == 1)
-            main();
-        ////////////
-        token_print_notes();
-        if (game_round % 2 == 0) {
-            printf("Detective! pls choose one token and enter its name as a string : \n");
-            turn = 0;
-        }
-        if (game_round % 2 == 1) {
-            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-            turn = 1;
-        }
-        choose_token( head );
-        printmap(head);
-        if(detective_win_check(head) == 1)
-            main();
-        /////////////
-        token_print_notes();
-        if (game_round % 2 == 0) {
-            printf("Detective! pls choose one token and enter its name as a string : \n");
-            turn = 0;
-        }
-        if (game_round % 2 == 1)
-        {
-            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-            turn = 1;
-        }
-        choose_token( head );
-        printmap(head);
-        if(detective_win_check(head) == 1)
-            main();
-        //////////
-        token_print_notes();
-        if (game_round % 2 == 0) {
-            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-            turn = 1;
-        }
-        if (game_round % 2 == 1) {
-            printf("Detective! pls choose one token and enter its name as a string : \n");
-            turn = 0;
-        }
-        choose_token( head );
-        printf("- - - - - - - - - - - - - - -\n");
-        printmap(head);
-        can_see(head);
-        printmap(head);
-        if(detective_win_check(head) == 1)
-            main();
-        if( jack_win_check(head) == 1)
-            main();
-        if(game_round == 8) {
-            printf("* * * * * * * * * * * *\n\n");
-            printf("congratulations!!!\nMR.JACK IS WINNER!\n\n");
-            printf(" * * * * * * * * * * * *\n\n");
-            main();
-        }
-        printf("enter 'SAVE' to save game:\n");
-        printf("if you don't want to save game , enter another character:\n");
-        char SaveChar[10];
-        fflush(stdin);
-        scanf("%s" , SaveChar);
-        if (strcmpi(SaveChar , "save") == 0) {
-            save_game(head);
-            printf("1 for return\n");
-            int ret;
-            scanf("%d" , &ret);
-            if (ret == 1)
-                return;
-        }
-//    fclose(write);
+    GR = 1;
+    start_game(head);
+    fclose(write);
     }
-}
+
 void choose_mr_jack()
 {
     srand(time(0));
@@ -2122,6 +2033,110 @@ int jack_win_check(struct tile *head)
     }
     return 0;
 }
+void start_game(struct tile *head) {
+    struct tile *current;
+    printmap(head);
+
+    printf("if you are ready , pls enter a character to start the game!\n");
+    char start_char;
+    getchar();
+    fflush(stdin);
+    scanf("%c", &start_char);
+    char choice[10];
+//    int round_part; //an integer between 0 & 1
+
+
+    for (game_round = GR; game_round < 9; game_round++) {
+        for (current = head; current != NULL; current = current->next) {
+            current->det_vision = 0;
+        }
+        rotation_joker_status = 0;
+        rotation_exchange_status = 0;
+        sherlock_alibi_status = 0;
+        toby_watson_status = 0;
+        printf("- - - - - - - - - - - - - - -\n-%dth ROUND-\n- - - - - - - - - - - - - - -\n", game_round);
+        if (game_round % 2 == 0) {
+            token2();
+        }
+        if (game_round % 2 == 1) {
+            token1();
+        }
+        if (game_round % 2 == 0) {
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+        }
+        if (game_round % 2 == 1) {
+            printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+        }
+        choose_token(head);
+        printmap(head);
+        if (detective_win_check(head) == 1)
+            main();
+        ////////////
+        token_print_notes();
+        if (game_round % 2 == 0) {
+            printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+        }
+        if (game_round % 2 == 1) {
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+        }
+        choose_token(head);
+        printmap(head);
+        if (detective_win_check(head) == 1)
+            main();
+        /////////////
+        token_print_notes();
+        if (game_round % 2 == 0) {
+            printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+        }
+        if (game_round % 2 == 1) {
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+        }
+        choose_token(head);
+        printmap(head);
+        if (detective_win_check(head) == 1)
+            main();
+        //////////
+        token_print_notes();
+        if (game_round % 2 == 0) {
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+        }
+        if (game_round % 2 == 1) {
+            printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+        }
+        choose_token(head);
+        printf("- - - - - - - - - - - - - - -\n");
+        printmap(head);
+        can_see(head);
+        printmap(head);
+        if (detective_win_check(head) == 1)
+            main();
+        if (jack_win_check(head) == 1)
+            main();
+        if (game_round == 8) {
+            printf("* * * * * * * * * * * *\n\n");
+            printf("congratulations!!!\nMR.JACK IS WINNER!\n\n");
+            printf(" * * * * * * * * * * * *\n\n");
+            main();
+        }
+        printf("enter 'SAVE' to save game:\n");
+        printf("if you don't want to save game , enter another character:\n");
+        char SaveChar[10];
+        fflush(stdin);
+        scanf("%s", SaveChar);
+        if (strcmpi(SaveChar, "save") == 0) {
+            save_game(head);
+                return;
+        }
+    }
+}
 ///////////////////////////
 
 //////////////////////////
@@ -2288,117 +2303,21 @@ void load_selected_game(struct tile *head) {
                 }
 //                if (head == NULL)
 //                    printf("NULL HEAD\n");
-                struct tile *current;
-                /////////////START GAME////////////////////////////////
-                printmap(head);
-                strcpy(game_name , file_name_load);
-                for (game_round = file_game_round + 1; game_round < 9; game_round++) {
-                    for (current = head; current != NULL; current = current->next) {
-                        current->det_vision = 0;
+                struct tile *send = head;
+                struct tile *jj;
+                GR = file_game_round + 1;
+                for (jj = send ; jj->is_jack == 1 ; jj = jj->next );
+                strcpy(MrJacks_real_name_st , jj->tile_name);
+                printf("MrJack's real name is %s \n" , MrJacks_real_name_st);
+                start_game(send);
+                return;
+
+                int flag = 0;
+                while (flag == 0) {
+                    fscanf(read, "%c", &c);
+                    if (c == '*') {
+                        flag = 1;
                     }
-                    rotation_joker_status = 0;
-                    rotation_exchange_status = 0;
-                    sherlock_alibi_status = 0;
-                    toby_watson_status = 0;
-                    printf("- - - - - - - - - - - - - - -\n-%dth ROUND-\n- - - - - - - - - - - - - - -\n", game_round);
-                    if (game_round % 2 == 0) {
-                        token2();
-                    }
-                    if (game_round % 2 == 1) {
-                        token1();
-                    }
-                    if (game_round % 2 == 0) {
-                        printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-                        turn = 1;
-                    }
-                    if (game_round % 2 == 1) {
-                        printf("Detective! pls choose one token and enter its name as a string : \n");
-                        turn = 0;
-                    }
-                    choose_token(head);
-                    printmap(head);
-                    if (detective_win_check(head) == 1)
-                        main();
-                    ////////////
-                    token_print_notes();
-                    if (game_round % 2 == 0) {
-                        printf("Detective! pls choose one token and enter its name as a string : \n");
-                        turn = 0;
-                    }
-                    if (game_round % 2 == 1) {
-                        printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-                        turn = 1;
-                    }
-                    choose_token(head);
-                    printmap(head);
-                    if (detective_win_check(head) == 1)
-                        main();
-                    /////////////
-                    token_print_notes();
-                    if (game_round % 2 == 0) {
-                        printf("Detective! pls choose one token and enter its name as a string : \n");
-                        turn = 0;
-                    }
-                    if (game_round % 2 == 1) {
-                        printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-                        turn = 1;
-                    }
-                    choose_token(head);
-                    printmap(head);
-                    if (detective_win_check(head) == 1)
-                        main();
-                    //////////
-                    token_print_notes();
-                    if (game_round % 2 == 0) {
-                        printf("Mr.jack! pls choose one token and enter its name as a string : \n");
-                        turn = 1;
-                    }
-                    if (game_round % 2 == 1) {
-                        printf("Detective! pls choose one token and enter its name as a string : \n");
-                        turn = 0;
-                    }
-                    choose_token(head);
-                    printf("- - - - - - - - - - - - - - -\n");
-                    printmap(head);
-                    can_see(head);
-                    printmap(head);
-                    if (detective_win_check(head) == 1)
-                        main();
-                    if (jack_win_check(head) == 1)
-                        main();
-                    if (game_round == 8) {
-                        printf("* * * * * * * * * * * *\n\n");
-                        printf("congratulations!!!\nMR.JACK IS WINNER!\n\n");
-                        printf(" * * * * * * * * * * * *\n\n");
-                        main();
-                    }
-                    printf("enter 'SAVE' to save game:\n");
-                    printf("if you don't want to save game , enter another character:\n");
-                    char SaveChar[10];
-                    fflush(stdin);
-                    scanf("%s", SaveChar);
-                    if (strcmpi(SaveChar, "save") == 0) {
-                        fprintf(write , "%s\n" , game_name);
-                        fprintf(write , "%d\n" , game_round);
-                        fprintf(write , "%d\n" , hourglass);
-                        file_print_tokens();
-                        file_print_map(head);
-                        fprintf(write , "*\n");
-                        printf("1 for return\n");
-                        int ret;
-                        scanf("%d", &ret);
-                        if (ret == 1)
-                            return;
-                    }
-                    return;
-                }
-            }
-            ////////////////////////////////////////////////////////
-            int flag = 0;
-            while (flag == 0) {
-                fscanf(read, "%c", &c);
-                if (c == '*') {
-                    flag = 1;
                 }
             }
         }
@@ -2446,5 +2365,374 @@ void print_data(struct tile *head)
         printf("%d ", nn->alibi_status);
         printf("%d ", nn->det_vision);
         printf("%d\n", nn->is_jack);
+    }
+}
+
+void duel()
+{
+    struct tile *head = NULL;
+    write = fopen("save.txt" , "a+");
+    printf("- Please enter the name of this Game:\n");
+    fflush(stdin);
+    scanf("%s" , game_name);
+
+    int flag_name = 0;
+    do {
+        printf("- Choose which role you want to play? (Mr.Jack/Detective)\n");
+        char role[30];
+        fflush(stdin);
+        scanf("%s", role);
+        if (strcmpi(role, "Mr.Jack") == 0) {
+            first_player_role = 1;
+            second_player_role = 0;
+            printf("the player is : Mr.Jack\n& the computer is :Detective\n");
+            strcpy(computer , "de");
+            flag_name = 1;
+        }
+        if (strcmpi(role, "Detective") == 0) {
+            first_player_role = 0;
+            second_player_role = 1;
+            printf("the player is : Detective\n& the computer is :Mr.Jack\n");
+            strcpy(computer , "mr");
+            flag_name = 1;
+        }
+        if (flag_name == 0)
+            printf("pls enter a valid name!\n");
+    } while (flag_name == 0);
+    int close_eye;
+    printf("- Mr.Jack's identity will be defined. if the detective close his/her eyes , mr jack enter '1'\n");
+    do {
+        fflush(stdin);
+        scanf("%d", &close_eye);
+        if (close_eye != 1)
+            printf("DON'T CHEAT!!! CLOSE YOUR EYES!\nmr jack! if he/she closed his/her eyes enter '1'\n");
+    } while (close_eye != 1);
+
+    choose_mr_jack();
+    random_tiles_at_first_time();
+    int added_tiles_count = 0;
+    char tile_info[3];
+    int h;
+    for (int i = 1; i <= 3; i++) {
+        for (int j = 1; j <= 3; j++) {
+            int info = tiles_array_check_repitition[added_tiles_count];
+            if (info == 1) {
+                strcpy(tile_info, "IL");
+                h = 0;
+            }
+            if (info == 2) {
+                strcpy(tile_info, "JB");
+                h = 1;
+            }
+            if (info == 3) {
+                strcpy(tile_info, "JP");
+                h = 1;
+            }
+            if (info == 4) {
+                strcpy(tile_info, "JS");
+                h = 1;
+            }
+            if (info == 5) {
+                strcpy(tile_info, "JL");
+                h = 1;
+            }
+            if (info == 6) {
+                strcpy(tile_info, "MA");
+                h = 2;
+            }
+            if (info == 7) {
+                strcpy(tile_info, "MS");
+                h = 1;
+            }
+            if (info == 8) {
+                strcpy(tile_info, "SG");
+                h = 0;
+            }
+            if (info == 9) {
+                strcpy(tile_info, "WG");
+                h = 1;
+            }
+            add_tile(&head, tile_info, i, j , added_tiles_count , h);
+            added_tiles_count++;
+        }
+    }
+    struct tile* curr;
+    for (curr = head ; curr != NULL && strcmpi(curr->tile_name , MrJacks_real_name_st) !=0 ; curr = curr->next);
+    curr->is_jack = 1;
+    printf("- - - - - - - - - - - - - - -\n");
+    if (game_round == 0) {
+        Toby = 11;
+        Watson = 5;
+        Sherlock = 4;
+    }
+    GR = 1;
+    start_game_duel(head);
+    fclose(write);
+}
+void start_game_duel(struct tile *head)
+{
+    struct tile *current;
+    printmap(head);
+
+    printf("if you are ready , pls enter a character to start the game!\n");
+    char start_char;
+    getchar();
+    fflush(stdin);
+    scanf("%c", &start_char);
+    char choice[10];
+
+    for (game_round = GR; game_round < 9; game_round++) {
+        for (current = head; current != NULL; current = current->next) {
+            current->det_vision = 0;
+        }
+        rotation_joker_status = 0;
+        rotation_exchange_status = 0;
+        sherlock_alibi_status = 0;
+        toby_watson_status = 0;
+        printf("- - - - - - - - - - - - - - -\n-%dth ROUND-\n- - - - - - - - - - - - - - -\n", game_round);
+        if (game_round % 2 == 0) {
+            token2();
+        }
+        if (game_round % 2 == 1) {
+            token1();
+        }
+        if (game_round % 2 == 0) {
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+            if (strcmpi(computer , "mr") == 0)
+                comp = 1;
+            else
+                comp = 0;
+        }
+        if (game_round % 2 == 1) {
+            printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+            if (strcmpi(computer , "de") == 0)
+                comp = 1;
+            else
+                comp = 0;
+        }
+        choose_token_duel(head);
+        printmap(head);
+        if (detective_win_check(head) == 1)
+            main();
+        ////////////
+        token_print_notes();
+        if (game_round % 2 == 0) {
+            printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+            if (strcmpi(computer , "de") == 0)
+                comp = 1;
+            else
+                comp = 0;
+        }
+        if (game_round % 2 == 1) {
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+            if (strcmpi(computer , "mr") == 0)
+                comp = 1;
+            else
+                comp = 0;
+        }
+        choose_token_duel(head);
+        printmap(head);
+        if (detective_win_check(head) == 1)
+            main();
+        /////////////
+        token_print_notes();
+        if (game_round % 2 == 0) {
+            printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+            if (strcmpi(computer , "de") == 0)
+                comp = 1;
+            else
+                comp = 0;
+        }
+        if (game_round % 2 == 1) {
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+            if (strcmpi(computer , "mr") == 0)
+                comp = 1;
+            else
+                comp = 0;
+        }
+        choose_token_duel(head);
+        printmap(head);
+        if (detective_win_check(head) == 1)
+            main();
+        //////////
+        token_print_notes();
+        if (game_round % 2 == 0) {
+            printf("Mr.jack! pls choose one token and enter its name as a string : \n");
+            turn = 1;
+            if (strcmpi(computer , "mr") == 0)
+                comp = 1;
+            else
+                comp = 0;
+        }
+        if (game_round % 2 == 1) {
+            printf("Detective! pls choose one token and enter its name as a string : \n");
+            turn = 0;
+            if (strcmpi(computer , "de") == 0)
+                comp = 1;
+            else
+                comp = 0;
+        }
+        choose_token_duel(head);
+        printf("- - - - - - - - - - - - - - -\n");
+        printmap(head);
+        can_see(head);
+        printmap(head);
+        if (detective_win_check(head) == 1)
+            main();
+        if (jack_win_check(head) == 1)
+            main();
+        if (game_round == 8) {
+            printf("* * * * * * * * * * * *\n\n");
+            printf("congratulations!!!\nMR.JACK IS WINNER!\n\n");
+            printf(" * * * * * * * * * * * *\n\n");
+            main();
+        }
+        printf("enter 'SAVE' to save game:\n");
+        printf("if you don't want to save game , enter another character:\n");
+        char SaveChar[10];
+        fflush(stdin);
+        scanf("%s", SaveChar);
+        if (strcmpi(SaveChar, "save") == 0) {
+            save_game(head);
+            return;
+        }
+    }
+}
+void choose_token_duel(struct tile *head)
+{
+    char choice[10] ;
+    int flag = 0;
+    if(comp == 0) {
+        do {
+            fflush(stdin);
+            scanf("%s", choice);
+            if (strcmpi(choice, "rotation1") == 0) {
+                rotation(head);
+                rotation_joker_status = 1;
+                flag = 1;
+            }
+            if (strcmpi(choice, "rotation2") == 0) {
+                rotation(head);
+                rotation_exchange_status = 1;
+                flag = 1;
+            }
+            if (strcmpi(choice, "joker") == 0) {
+                joker();
+                rotation_joker_status = 1;
+                flag = 1;
+            }
+            if (strcmpi(choice, "toby") == 0) {
+                toby();
+                toby_watson_status = 1;
+                flag = 1;
+            }
+            if (strcmpi(choice, "watson") == 0) {
+                watson();
+                toby_watson_status = 1;
+                flag = 1;
+            }
+            if (strcmpi(choice, "sherlock") == 0) {
+                sherlock();
+                sherlock_alibi_status = 1;
+                flag = 1;
+            }
+            if (strcmpi(choice, "exchange") == 0) {
+                head = exchange(head);
+                rotation_exchange_status = 1;
+                flag = 1;
+            }
+            if (strcmpi(choice, "alibi") == 0) {
+                alibi(head, turn);
+                sherlock_alibi_status = 1;
+                flag = 1;
+            }
+            if (flag == 0)
+                printf("pls enter a valid string!\n");
+        } while (flag == 0);
+    }
+
+    if (comp == 1)
+    {
+        int f = 0;
+        do {
+            int ch = rand() % (4) + 1;
+            if(ch == 1)
+            {
+                if(tokens.rotation_joker == 0 && rotation_joker_status == 0)
+                {
+                    f = 1;
+                    printf(" - rotation\n");
+                    rotation(head);
+                }
+                if(tokens.rotation_joker == 1 && rotation_joker_status == 0)
+                {
+                    f = 1;
+                    printf(" - joker\n");
+                    joker();
+                }
+            }
+            if (ch == 2)
+            {
+                if(tokens.rotation_exchange == 0 && rotation_exchange_status == 0)
+                {
+                    f = 1;
+                    printf(" - rotation\n");
+                    rotation(head);
+                }
+                if(tokens.rotation_exchange == 1 && rotation_exchange_status == 0)
+                {
+                    f = 1;
+                    printf(" - exchange\n");
+                    exchange(head);
+                }
+            }
+            if(ch == 3)
+            {
+                if(tokens.toby_watson == 0 && toby_watson_status == 0)
+                {
+                    f = 1;
+                    int tc = rand()%(2) + 1;
+                    printf(" - toby %d\n" , tc);
+                    if(tc == 1)
+                        toby1(Toby);
+                    if(tc == 2)
+                        toby2(Toby);
+                }
+                if(tokens.toby_watson == 1 && toby_watson_status == 0)
+                {
+                    f = 1;
+                    int tc = rand()%(2) + 1;
+                    printf(" - watson %d\n" , tc);
+                    if(tc == 1)
+                        watson1(Watson);
+                    if(tc == 2)
+                        watson2(Watson);
+                }
+            }
+            if (ch == 4)
+            {
+                if(tokens.sherlock_alibi == 0 && sherlock_alibi_status == 0)
+                {
+                    f = 1;
+                    int tc = rand()%(2) + 1;
+                    printf(" - sherlock %d\n" , tc);
+                    if(tc == 1)
+                        sherlock1(Sherlock);
+                    if(tc == 2)
+                        sherlock2(Sherlock);
+                }
+                if(tokens.sherlock_alibi == 1 && sherlock_alibi_status == 0)
+                {
+                    printf(" - alibi\n");
+                    alibi(head , turn);
+                }
+            }
+        } while (f == 0);
     }
 }
