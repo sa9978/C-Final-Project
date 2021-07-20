@@ -102,10 +102,13 @@ void continue_game();
 void print_data(struct tile* head);
 
 /////
-void duel();
-void start_game_duel(struct tile *head);
-void choose_token_duel(struct tile *head);
+void solo();
+void start_game_solo(struct tile *head);
+void choose_token_solo(struct tile *head);
 int comp; //comp's turn 1       player's turn0
+struct tile* exchange_solo(struct tile* head);
+void rotation_solo(struct tile* head);
+void joker_solo();
 ///////
 int main() {
     start_game_menu();
@@ -115,8 +118,8 @@ void start_game_menu()
 {
     struct tile *head = NULL;
     int flag = 0;
-    printf("1- New Game (Solo)\n");
-    printf("2- New Game (Duel)\n");
+    printf("1- New Game (Duel)\n");
+    printf("2- New Game (Solo)\n");
     printf("3- Load Game\n");
     printf("4- Exit\n");
     fflush(stdin);
@@ -129,7 +132,7 @@ void start_game_menu()
         }
         if (start_key == 2)
         {
-            duel();
+            solo();
             flag = 1;
         }
         if (start_key == 3)
@@ -432,8 +435,8 @@ void token1()
 {
     tokens.rotation_joker = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
     tokens.rotation_exchange = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
-    tokens.toby_watson = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
     tokens.sherlock_alibi = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
+    tokens.toby_watson = rand()% (1 - 0 + 1) + 0; //random num between 0 & 1
     token_print_notes();
 
 }
@@ -449,15 +452,16 @@ void token2()
     else if(tokens.rotation_exchange == 1)
         tokens.rotation_exchange = 0;
 
+    if(tokens.sherlock_alibi == 0)
+        tokens.sherlock_alibi = 1;
+    else if(tokens.sherlock_alibi == 1)
+        tokens.sherlock_alibi = 0;
+
     if(tokens.toby_watson == 0)
         tokens.toby_watson = 1;
     else if(tokens.toby_watson == 1)
         tokens.toby_watson = 0;
 
-    if(tokens.sherlock_alibi == 0)
-        tokens.sherlock_alibi = 1;
-    else if(tokens.sherlock_alibi == 1)
-        tokens.sherlock_alibi = 0;
     token_print_notes();
 }
 void token_print_notes()
@@ -473,15 +477,16 @@ void token_print_notes()
     if(tokens.rotation_exchange == 1 && rotation_exchange_status == 0)
         printf("2 : EXCHANGE\nnote : you can change two tiles\n");
 
+    if(tokens.sherlock_alibi == 0 && sherlock_alibi_status == 0)
+        printf("4 : SHERLOCK\nnote : you can move Sherlock for one or two blocks\n");
+    if(tokens.sherlock_alibi == 1 && sherlock_alibi_status == 0)
+        printf("4 : ALIBI\nnote : you can choose one of suspects cards\n");
+
     if(tokens.toby_watson == 0 && toby_watson_status == 0)
         printf("3 : TOBY\nnote : you can move Toby for one or two blocks\n");
     if(tokens.toby_watson == 1 && toby_watson_status == 0)
         printf("3 : WATSON\nnote : you can move Watson for one or two blocks\n");
 
-    if(tokens.sherlock_alibi == 0 && sherlock_alibi_status == 0)
-        printf("4 : SHERLOCK\nnote : you can move Sherlock for one or two blocks\n");
-    if(tokens.sherlock_alibi == 1 && sherlock_alibi_status == 0)
-        printf("4 : ALIBI\nnote : you can choose one of suspects cards\n");
 }
 void choose_token(struct tile *head)
 {
@@ -2368,7 +2373,7 @@ void print_data(struct tile *head)
     }
 }
 
-void duel()
+void solo()
 {
     struct tile *head = NULL;
     write = fopen("save.txt" , "a+");
@@ -2466,10 +2471,10 @@ void duel()
         Sherlock = 4;
     }
     GR = 1;
-    start_game_duel(head);
+    start_game_solo(head);
     fclose(write);
 }
-void start_game_duel(struct tile *head)
+void start_game_solo(struct tile *head)
 {
     struct tile *current;
     printmap(head);
@@ -2512,7 +2517,7 @@ void start_game_duel(struct tile *head)
             else
                 comp = 0;
         }
-        choose_token_duel(head);
+        choose_token_solo(head);
         printmap(head);
         if (detective_win_check(head) == 1)
             main();
@@ -2534,7 +2539,7 @@ void start_game_duel(struct tile *head)
             else
                 comp = 0;
         }
-        choose_token_duel(head);
+        choose_token_solo(head);
         printmap(head);
         if (detective_win_check(head) == 1)
             main();
@@ -2556,7 +2561,7 @@ void start_game_duel(struct tile *head)
             else
                 comp = 0;
         }
-        choose_token_duel(head);
+        choose_token_solo(head);
         printmap(head);
         if (detective_win_check(head) == 1)
             main();
@@ -2578,7 +2583,7 @@ void start_game_duel(struct tile *head)
             else
                 comp = 0;
         }
-        choose_token_duel(head);
+        choose_token_solo(head);
         printf("- - - - - - - - - - - - - - -\n");
         printmap(head);
         can_see(head);
@@ -2604,7 +2609,7 @@ void start_game_duel(struct tile *head)
         }
     }
 }
-void choose_token_duel(struct tile *head)
+void choose_token_solo(struct tile *head)
 {
     char choice[10] ;
     int flag = 0;
@@ -2668,13 +2673,15 @@ void choose_token_duel(struct tile *head)
                 {
                     f = 1;
                     printf(" - rotation\n");
-                    rotation(head);
+                    rotation_solo(head);
+                    printmap(head);
                 }
                 if(tokens.rotation_joker == 1 && rotation_joker_status == 0)
                 {
                     f = 1;
                     printf(" - joker\n");
-                    joker();
+                    joker_solo();
+                    printmap(head);
                 }
             }
             if (ch == 2)
@@ -2683,13 +2690,15 @@ void choose_token_duel(struct tile *head)
                 {
                     f = 1;
                     printf(" - rotation\n");
-                    rotation(head);
+                    rotation_solo(head);
+                    printmap(head);
                 }
                 if(tokens.rotation_exchange == 1 && rotation_exchange_status == 0)
                 {
                     f = 1;
                     printf(" - exchange\n");
-                    exchange(head);
+                    exchange_solo(head);
+                    printmap(head);
                 }
             }
             if(ch == 3)
@@ -2703,6 +2712,7 @@ void choose_token_duel(struct tile *head)
                         toby1(Toby);
                     if(tc == 2)
                         toby2(Toby);
+                    printmap(head);
                 }
                 if(tokens.toby_watson == 1 && toby_watson_status == 0)
                 {
@@ -2713,6 +2723,7 @@ void choose_token_duel(struct tile *head)
                         watson1(Watson);
                     if(tc == 2)
                         watson2(Watson);
+                    printmap(head);
                 }
             }
             if (ch == 4)
@@ -2726,13 +2737,146 @@ void choose_token_duel(struct tile *head)
                         sherlock1(Sherlock);
                     if(tc == 2)
                         sherlock2(Sherlock);
+                    printmap(head);
                 }
                 if(tokens.sherlock_alibi == 1 && sherlock_alibi_status == 0)
                 {
                     printf(" - alibi\n");
                     alibi(head , turn);
+                    printmap(head);
                 }
             }
         } while (f == 0);
     }
 }
+struct tile* exchange_solo(struct tile* head)
+{
+    struct tile *new;
+    struct tile *ra;
+    char sus1[3] , sus2[3];
+    int cc1 , cc2 , k1 = 0, k2 = 0;
+    do{
+         cc1 = rand()%(9) + 1;
+        do {
+            cc2 = rand()%(9) + 1;
+        } while (cc1 == cc2);
+        for (ra = head ; ra ->number != cc1 ;ra = ra -> next)
+        {
+            if (ra->status == 1) {
+                k1 = 1;
+                strcpy(sus1 , ra->tile_name);
+            }
+        }
+        for (ra = head ; ra ->number != cc2 ;ra = ra -> next)
+        {
+            if (ra->status == 1) {
+                k2 = 1;
+                strcpy(sus2 , ra->tile_name);
+            }
+        }
+    } while (k1 == 0 || k2 == 0);
+    printf("%s with %s\n" , sus1 , sus2);
+    struct tile* current1;
+    struct tile* current2;
+    for (current1 = head; current1->next != NULL && strcmpi(current1->tile_name, sus1) != 0; current1 = current1->next);
+    for (current2 = head; current2->next != NULL && strcmpi(current2->tile_name, sus2) != 0; current2 = current2->next);
+    char temp[3];
+    int c1 , c2 , r1 , r2 , e1 , e2;
+    c1 = current1->column;
+    c2 = current2 ->column;
+    r1 = current1 -> row;
+    r2 = current2 ->row;
+    e1 = current1->end;
+    e2 = current2->end;
+//    printf("r1 = %d . c1 = %d , sus1 = %s , r2 = %d . c2 = %d , sus2 = %s \n" , r1 , c1 , sus1 , r2 , c2 , sus2);
+    int flag = 0;
+    for (new = head; new->next != NULL; new = new->next) {
+        if( strcmpi(new->tile_name, sus1) == 0 && flag == 0) {
+            new->row = r2;
+            new->column = c2;
+            new ->end = e1;
+//            strcpy(new->tile_name, sus2);
+            flag = 1;
+//            printf("name = %s , row = %d , col = %d , end = %d\n" , new->tile_name , new ->row , new->column , new->end);
+        }
+    }
+    for (new = head; new->next != NULL; new = new->next)
+    {
+        if(strcmpi(new->tile_name, sus2) == 0 && flag == 1) {
+            new->row = r1;
+            new->column = c1;
+            new ->end = e2;
+//            strcpy(new->tile_name, sus1);
+//            printf("*name = %s , row = %d , col = %d , end = %d\n" , new->tile_name , new ->row , new->column , new->end);
+        }
+    }
+    return new;
+}
+void rotation_solo(struct tile* head)
+{
+    char rotate_character[3];
+    struct tile *s;
+    int c , d;
+    do {
+        c = rand()%(9) + 1;
+        for (s = head ; s->number != c ; s = s->next)
+        {
+            strcpy(rotate_character , s->tile_name);
+        }
+
+    } while (s->status == 0);
+    do {
+        c = rand()%(4) + 1;
+        for (s = head ; s->number != c ; s = s->next)
+        {
+            d = s->end;
+        }
+    } while (d == c);
+    printf("rotate %s to " , rotate_character);
+    if(d == 1)
+    {
+        printf("up\n");
+    }
+    if(d == 2)
+    {
+        printf("right\n");
+    }
+    if(d == 3)
+    {
+        printf("down\n");
+    }
+    if(d == 4)
+    {
+        printf("left\n");
+    }
+//    char dir[10];
+    struct tile* current;
+    for (current = head; current->next != NULL && strcmpi(current->tile_name, rotate_character) != 0; current = current->next);
+    if(d == 1)
+        current->end = up;
+    if(d == 2)
+        current->end = down;
+    if(d == 3)
+        current->end = right;
+    if(d == 4)
+        current->end = left;
+}
+void joker_solo()
+{
+    char character[10];
+    int c = rand()%(3) + 1;
+    if (c == 1) {
+        Sherlock = sherlock1(Sherlock);
+        printf("sherlock moved\n");
+    }
+    if (c == 2) {
+        Watson = watson1(Watson);
+        printf("watson moved\n");
+    }
+    if (c == 3) {
+        Toby = toby1(Toby);
+        printf("toby moved\n");
+    }
+
+}
+
