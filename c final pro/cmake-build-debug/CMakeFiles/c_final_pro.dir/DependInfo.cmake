@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "E:/c final pro git/Final-c/c final pro/main.c" "E:/c final pro git/Final-c/c final pro/cmake-build-debug/CMakeFiles/c_final_pro.dir/main.c.obj"
+  "E:/c final pro git/Final-c/final/main.c" "E:/c final pro git/Final-c/final/cmake-build-debug/CMakeFiles/c_final_pro.dir/main.c.obj"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 
