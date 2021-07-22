@@ -40,6 +40,13 @@ int udet_vision;
 int uToby;
 int uSherlock;
 int uWatson;
+
+char urotation[3];
+char ualibi[3];
+int uhour;
+char uexchange1[3];
+char uexchange2[3];
+
 char uToken[15];
 struct action_tokens{
     int rotation_joker;// 0 : rotation , 1 : joker
@@ -579,6 +586,7 @@ void rotation(struct tile* head)
     char rotate_character[3];
     fflush(stdin);
     scanf("%s" , rotate_character);
+    strcpy(urotation , rotate_character);
     printf("which direction do yo want to be closed?(up , down , left , right)\n");
     char dir[10];
     fflush(stdin);
@@ -768,8 +776,10 @@ struct tile* exchange(struct tile* head)
     printf("pls enter the name of suspects that you want to change them : \n");
     fflush(stdin);
     scanf("%s" , sus1);
+    strcpy(uexchange1 , sus1);
     fflush(stdin);
     scanf("%s" , sus2);
+    strcpy(uexchange2 , sus2);
     struct tile* current1;
     struct tile* current2;
     for (current1 = head; current1->next != NULL && strcmpi(current1->tile_name, sus1) != 0; current1 = current1->next);
@@ -818,6 +828,7 @@ void alibi(struct tile* head , int turn)
             for (current = head ; current!= NULL && current->number != r ; current = current->next );
         } while (current->alibi_status ==0);
         printf("%s was reversed\n" , current->tile_name);
+        strcpy(ualibi , current->tile_name);
         current->status = 0;
         current->alibi_status = 0;
     }
@@ -827,6 +838,7 @@ void alibi(struct tile* head , int turn)
             r = rand()%(9 - 1 + 1) + 1;
             for (current = head ; current!= NULL && current->number != r ; current = current->next );
         } while (current->alibi_status == 0 );
+        uhour = hourglass;
         hourglass = hourglass + current->hour;
         printf("--hourglasses are updated!--\n");
         current->alibi_status = 0;
@@ -3011,13 +3023,16 @@ void rotation_solo(struct tile* head)
         }
 
     } while (s->status == 0);
+    int flag = 0;
     do {
         c = rand()%(4) + 1;
         for (s = head ; s->number != c ; s = s->next)
         {
             d = s->end;
+            if (s != c)
+                flag = 1;
         }
-    } while (d == c);
+    } while (flag == 0);
     printf("rotate %s to " , rotate_character);
     if(d == 1)
     {
@@ -3163,8 +3178,7 @@ void delay(int number_of_seconds)
     clock_t start_time = clock();
 
     // looping till required time is not achieved
-    while (clock() < start_time + milli_seconds)
-        ;
+    while (clock() < start_time + milli_seconds);
 }
 void save_undo(struct tile *head)
 {
@@ -3180,40 +3194,88 @@ void save_undo(struct tile *head)
     uhour = curr ->hour;
     ualibi_status = curr->alibi_status;
     udet_vision = curr->det_vision;
-    if(strcmpi(uToken , "rotation1") == 1)
+    if(strcmpi(uToken , "rotation1") == 0)
         rotation_joker_status = 0;
-    if(strcmpi(uToken , "rotation2") == 1)
+    if(strcmpi(uToken , "rotation2") == 0)
         rotation_exchange_status = 0;
-    if(strcmpi(uToken , "joker") == 1)
+    if(strcmpi(uToken , "joker") == 0)
         rotation_joker_status = 0;
-    if(strcmpi(uToken , "exchange") == 1)
+    if(strcmpi(uToken , "exchange") == 0)
         rotation_exchange_status = 0;
     if(strcmpi(uToken , "toby") == 1)
         toby_watson_status = 0;
-    if(strcmpi(uToken , "watson") == 1)
+    if(strcmpi(uToken , "watson") == 0)
         toby_watson_status = 0;
-    if(strcmpi(uToken , "alibi") == 1)
+    if(strcmpi(uToken , "alibi") == 0)
         sherlock_alibi_status = 0;
-    if(strcmpi(uToken , "sherlock") == 1)
+    if(strcmpi(uToken , "sherlock") == 0)
         sherlock_alibi_status = 0;
-
 }
 void load_undo(struct tile *head)
 {
     Sherlock = uSherlock ;
     Toby = uToby;
     Watson = uWatson;
-    struct tile *curr = head;
-    curr->row = urow;
-    curr ->column = ucolumn;
-    strcpy( curr->tile_name ,utile_name);
-    curr->end = uend ;
-    curr->status = ustatus;
-    curr->is_jack = uis_jack;
-    curr->number = unumber;
-    curr ->hour = uhour;
-    curr->alibi_status = ualibi_status;
-    curr->det_vision = udet_vision;
+    struct tile *curr;
+//    curr->row = urow;
+//    curr ->column = ucolumn;
+//    strcpy( curr->tile_name ,utile_name);
+//    curr->end = uend ;
+//    curr->status = ustatus;
+//    curr->is_jack = uis_jack;
+//    curr->number = unumber;
+//    curr ->hour = uhour;
+//    curr->alibi_status = ualibi_status;
+//    curr->det_vision = udet_vision;
+    if (strcmpi(uToken , "exchange") == 0)
+    {
+        struct tile* current1;
+        struct tile* current2;
+        struct tile* new;
+        for (current1 = head; current1->next != NULL && strcmpi(current1->tile_name, uexchange1) != 0; current1 = current1->next);
+        for (current2 = head; current2->next != NULL && strcmpi(current2->tile_name, uexchange2) != 0; current2 = current2->next);
+        char temp[3];
+        int c1 , c2 , r1 , r2 , e1 , e2;
+        c1 = current1->column;
+        c2 = current2 ->column;
+        r1 = current1 -> row;
+        r2 = current2 ->row;
+        e1 = current1->end;
+        e2 = current2->end;
+//    printf("r1 = %d . c1 = %d , sus1 = %s , r2 = %d . c2 = %d , sus2 = %s \n" , r1 , c1 , sus1 , r2 , c2 , sus2);
+        int flag = 0;
+        for (new = head; new->next != NULL; new = new->next) {
+            if( strcmpi(new->tile_name, uexchange1) == 0 && flag == 0) {
+                new->row = r2;
+                new->column = c2;
+                new ->end = e1;
+//            strcpy(new->tile_name, sus2);
+                flag = 1;
+//            printf("name = %s , row = %d , col = %d , end = %d\n" , new->tile_name , new ->row , new->column , new->end);
+            }
+        }
+        for (new = head; new->next != NULL; new = new->next)
+        {
+            if(strcmpi(new->tile_name, uexchange2) == 0 && flag == 1) {
+                new->row = r1;
+                new->column = c1;
+                new ->end = e2;
+//            strcpy(new->tile_name, sus1);
+//            printf("*name = %s , row = %d , col = %d , end = %d\n" , new->tile_name , new ->row , new->column , new->end);
+            }
+        }
+    }
+    if (strcmpi(uToken , "rotation1") == 0 || (strcmpi(uToken , "rotation2") == 0))
+    {
+        for (curr = head ; strcmpi(urotation , curr->tile_name) != 0 ; curr = curr->next);
+        curr->end = uend;
+    }
+    if (strcmpi(uToken , "alibi") == 0)
+    {
+        hourglass = uhour;
+        for (curr = head ; strcmpi(ualibi , curr->tile_name) != 0 ; curr = curr->next);
+        curr->alibi_status = ualibi_status;
+    }
     printmap(head);
     token_print_notes();
     printf("choose token again:\n");
