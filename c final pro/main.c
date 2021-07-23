@@ -2,6 +2,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
+//#include <unistd.h>
 // ** *1 *2 *3 **
 // *4 11 12 13 *5
 // *6 21 22 23 *7
@@ -21,7 +22,7 @@ struct tile{
     enum tile_street end;
     int status; // this parameter shows the tile is on the front side or not  ... 1 : front// 0 : back
     int is_jack; //this parameter shows the is jack or not ... jack1 innocent0
-    int number; //just a number between 1 & 9 , but unique for each tile
+    int number; //just a number between 0 & 8 , but unique for each tile
     int hour; // count hourglasses
     int alibi_status; //shows that the card can be in alibi token1 or not0
     int det_vision; //1 shows that det.s maybe see him
@@ -43,7 +44,6 @@ int uWatson;
 
 char urotation[3];
 char ualibi[3];
-int uhour;
 char uexchange1[3];
 char uexchange2[3];
 
@@ -60,6 +60,17 @@ int rotation_joker_status; //0 for didnt printed
 int rotation_exchange_status;
 int toby_watson_status;
 int sherlock_alibi_status;
+
+int urotation_joker_status; //2 for undo
+int urotation_exchange_status;
+int utoby_watson_status;
+int usherlock_alibi_status;
+
+int frotation_joker_status; //0 for didnt printed
+int frotation_exchange_status;
+int ftoby_watson_status;
+int fsherlock_alibi_status;
+
 int hourglass = 0;
 int start_key;
 int game_round = 0;
@@ -159,42 +170,42 @@ int start_game_menu()
     printf("5- Exit\n");
     fflush(stdin);
 //    do {
-        scanf("%d", &start_key);
-        if (start_key == 1)
-        {
-            new_game_menu();
-            flag = 1;
-        }
-        if (start_key == 2)
-        {
-            solo();
-            flag = 1;
-        }
-        if (start_key == 3)
-        {
-            load_game(head);
-            flag = 1;
-        }
-        if (start_key == 4)
-        {
-            play_film();
-            flag = 1;
-        }
-        if (start_key == 5)
-            return 0;
+    scanf("%d", &start_key);
+    if (start_key == 1)
+    {
+        new_game_menu();
+        flag = 1;
+    }
+    if (start_key == 2)
+    {
+        solo();
+        flag = 1;
+    }
+    if (start_key == 3)
+    {
+        load_game(head);
+        flag = 1;
+    }
+    if (start_key == 4)
+    {
+        play_film();
+        flag = 1;
+    }
+    if (start_key == 5)
+        return 0;
 
-        if(flag == 0)
-        {
-            printf("pls enter a valid number between 1 & 4:\n");
-        }
+    if(flag == 0)
+    {
+        printf("pls enter a valid number between 1 & 4:\n");
+    }
 //    } while (flag == 0);
 }
 void new_game_menu() {
     struct tile *head = NULL;
 //        write = fopen("save.txt" , "a+");
-        printf("- Please enter the name of this Game:\n");
-        fflush(stdin);
-        scanf("%s" , game_name);
+    printf("- Please enter the name of this Game:\n");
+    fflush(stdin);
+    scanf("%s" , game_name);
 
     int flag_name = 0;
     do {
@@ -220,7 +231,7 @@ void new_game_menu() {
     int close_eye;
     printf("- Mr.Jack's identity will be defined. if the detective close his/her eyes , mr jack enter '1'\n");
     do {
-      fflush(stdin);
+        fflush(stdin);
         scanf("%d", &close_eye);
         if (close_eye != 1)
             printf("DON'T CHEAT!!! CLOSE YOUR EYES!\nmr jack! if he/she closed his/her eyes enter '1'\n");
@@ -289,7 +300,7 @@ void new_game_menu() {
     GR = 1;
     start_game(head);
     fclose(write);
-    }
+}
 
 void choose_mr_jack()
 {
@@ -398,7 +409,7 @@ void add_tile(struct tile** head_ref, char tile_info[3] ,int ro ,int co ,int add
         last = last->next;
     last->next = nn;
 
-    }
+}
 void printmap(struct tile *head) {
     printf("- - - - - - - - - - - - - - -\n");
     struct tile *current;
@@ -572,7 +583,7 @@ void choose_token(struct tile *head)
             flag = 1;
         }
         if (strcmpi(choice, "alibi") == 0) {
-            alibi(head, turn);
+            alibi(head , turn);
             sherlock_alibi_status = 1;
             flag = 1;
         }
@@ -593,6 +604,7 @@ void rotation(struct tile* head)
     scanf("%s" , dir);
     struct tile* current;
     for (current = head; current->next != NULL && strcmpi(current->tile_name, rotate_character) != 0; current = current->next);
+    uend = current -> end;
     if(strcmpi(dir , "up") == 0)
         current->end = up;
     if(strcmpi(dir , "down") == 0)
@@ -2577,7 +2589,7 @@ int start_game_solo(struct tile *head)
             turn = 1;
             if (strcmpi(computer, "mr") == 0)
                 comp = 1;
-            else
+            if (strcmpi(computer, "de") == 0)
                 comp = 0;
         }
         if (game_round % 2 == 1) {
@@ -2585,7 +2597,7 @@ int start_game_solo(struct tile *head)
             turn = 0;
             if (strcmpi(computer, "de") == 0)
                 comp = 1;
-            else
+            if (strcmpi(computer, "mr") == 0)
                 comp = 0;
         }
         uSherlock = Sherlock ;
@@ -2600,12 +2612,13 @@ int start_game_solo(struct tile *head)
             main();
         if (comp == 0) {
             printf("enter 1 for undo:\n");
+            fflush(stdin);
             scanf("%d", &un);
             if (un == 1) {
-                if (turn == 1)
-                    turn = 0;
-                else
-                    turn = 1;
+//                if (turn == 1)
+//                    turn = 0;
+//                else
+//                    turn = 1;
                 load_undo(head);
                 printmap(head);
                 token_print_notes();
@@ -2618,14 +2631,14 @@ int start_game_solo(struct tile *head)
                     main();
             }
         }
-        ////////////
+        //////////// 2 ///////
         token_print_notes();
         if (game_round % 2 == 0) {
             printf("Detective! pls choose one token and enter its name as a string : \n");
             turn = 0;
             if (strcmpi(computer, "de") == 0)
                 comp = 1;
-            else
+            if (strcmpi(computer, "mr") == 0)
                 comp = 0;
         }
         if (game_round % 2 == 1) {
@@ -2633,7 +2646,7 @@ int start_game_solo(struct tile *head)
             turn = 1;
             if (strcmpi(computer, "mr") == 0)
                 comp = 1;
-            else
+            if (strcmpi(computer, "de") == 0)
                 comp = 0;
         }
         uSherlock = Sherlock ;
@@ -2645,14 +2658,16 @@ int start_game_solo(struct tile *head)
         film_map(head);
         if (detective_win_check(head) == 1)
             main();
+        un = 0;
         if (comp == 0) {
             printf("enter 1 for undo:\n");
+            fflush(stdin);
             scanf("%d", &un);
             if (un == 1) {
-                if (turn == 1)
-                    turn = 0;
-                else
-                    turn = 1;
+//                if (turn == 1)
+//                    turn = 0;
+//                else
+//                    turn = 1;
                 load_undo(head);
                 printmap(head);
                 token_print_notes();
@@ -2665,14 +2680,14 @@ int start_game_solo(struct tile *head)
                     main();
             }
         }
-        /////////////
+        ///////////// 3 /////////
         token_print_notes();
         if (game_round % 2 == 0) {
             printf("Detective! pls choose one token and enter its name as a string : \n");
             turn = 0;
             if (strcmpi(computer, "de") == 0)
                 comp = 1;
-            else
+            if (strcmpi(computer, "mr") == 0)
                 comp = 0;
         }
         if (game_round % 2 == 1) {
@@ -2680,7 +2695,7 @@ int start_game_solo(struct tile *head)
             turn = 1;
             if (strcmpi(computer, "mr") == 0)
                 comp = 1;
-            else
+            if (strcmpi(computer, "de") == 0)
                 comp = 0;
         }
         uSherlock = Sherlock ;
@@ -2692,14 +2707,16 @@ int start_game_solo(struct tile *head)
         film_map(head);
         if (detective_win_check(head) == 1)
             main();
+        un = 0;
         if (comp == 0) {
             printf("enter 1 for undo:\n");
+            fflush(stdin);
             scanf("%d", &un);
             if (un == 1) {
-                if (turn == 1)
-                    turn = 0;
-                else
-                    turn = 1;
+//                if (turn == 1)
+//                    turn = 0;
+//                else
+//                    turn = 1;
                 load_undo(head);
                 printmap(head);
                 token_print_notes();
@@ -2712,7 +2729,7 @@ int start_game_solo(struct tile *head)
                     main();
             }
         }
-        //////////
+        ////////// 4 //////////
         token_print_notes();
         if (game_round % 2 == 0) {
             printf("Mr.jack! pls choose one token and enter its name as a string : \n");
@@ -2733,8 +2750,8 @@ int start_game_solo(struct tile *head)
         uSherlock = Sherlock ;
         uToby = Toby;
         uWatson = Watson;
-        save_undo(head);
         choose_token_solo(head);
+        save_undo(head);
         printf("- - - - - - - - - - - - - - -\n");
         can_see(head);
         printmap(head);
@@ -2750,21 +2767,25 @@ int start_game_solo(struct tile *head)
             main();
         }
         char SaveChar[10];
+        un = 0;
         if (comp == 0) {
             printf("enter 1 for undo:\n");
+            fflush(stdin);
             scanf("%d", &un);
             if (un == 1) {
-                if (turn == 1)
-                    turn = 0;
-                else
-                    turn = 1;
+//                if (turn == 1)
+//                    turn = 0;
+//                else
+//                    turn = 1;
                 load_undo(head);
                 printmap(head);
                 token_print_notes();
                 choose_token_solo(head);
+            }
                 printf("- - - - - - - - - - - - - - -\n");
                 can_see(head);
                 printmap(head);
+
                 film_map(head);
                 if (detective_win_check(head) == 1)
                     main();
@@ -2777,20 +2798,24 @@ int start_game_solo(struct tile *head)
                     main();
                 }
             }
-            printf("enter 'SAVE' to save game:\n");
-            printf("if you don't want to save game , enter another character:\n");
-            fflush(stdin);
-            scanf("%s", &SaveChar);
-            if (strcmpi(SaveChar, "save") == 0) {
-                save_game(head);
-                return 0;
+//            printf("enter 'SAVE' to save game:\n");
+//            printf("if you don't want to save game , enter another character:\n");
+//            fflush(stdin);
+//            scanf("%s", SaveChar);
+//            if (strcmpi(SaveChar, "save") == 0) {
+//                save_game(head);
+//                return 0;
             }
 
-        }
     }
-}
+
 void choose_token_solo(struct tile *head)
 {
+    fsherlock_alibi_status = sherlock_alibi_status;
+    ftoby_watson_status = toby_watson_status;
+    frotation_exchange_status = rotation_exchange_status;
+    frotation_joker_status = rotation_joker_status;
+
     char choice[10] ;
     int flag = 0;
     if(comp == 0) {
@@ -2801,48 +2826,56 @@ void choose_token_solo(struct tile *head)
             if (strcmpi(choice, "rotation1") == 0) {
                 rotation(head);
                 rotation_joker_status = 1;
+//                tokens.rotation_joker = 1;
                 flag = 1;
                 printmap(head);
             }
             if (strcmpi(choice, "rotation2") == 0) {
                 rotation(head);
                 rotation_exchange_status = 1;
+//                tokens.rotation_exchange = 1;
                 flag = 1;
                 printmap(head);
             }
             if (strcmpi(choice, "joker") == 0) {
                 joker();
                 rotation_joker_status = 1;
+//                tokens.rotation_joker = 1;
                 flag = 1;
                 printmap(head);
             }
             if (strcmpi(choice, "toby") == 0) {
                 toby();
                 toby_watson_status = 1;
+//                tokens.toby_watson = 1;
                 flag = 1;
                 printmap(head);
             }
             if (strcmpi(choice, "watson") == 0) {
                 watson();
                 toby_watson_status = 1;
+//                tokens.toby_watson = 1;
                 flag = 1;
                 printmap(head);
             }
             if (strcmpi(choice, "sherlock") == 0) {
                 sherlock();
                 sherlock_alibi_status = 1;
+//                tokens.sherlock_alibi = 1;
                 flag = 1;
                 printmap(head);
             }
             if (strcmpi(choice, "exchange") == 0) {
                 exchange(head);
                 rotation_exchange_status = 1;
+//                tokens.rotation_exchange = 1;
                 flag = 1;
                 printmap(head);
             }
             if (strcmpi(choice, "alibi") == 0) {
-                alibi(head, turn);
+                alibi(head , turn);
                 sherlock_alibi_status = 1;
+//                tokens.sherlock_alibi = 1;
                 flag = 1;
                 printmap(head);
             }
@@ -2938,10 +2971,7 @@ void choose_token_solo(struct tile *head)
                 }
                 if(tokens.sherlock_alibi == 1 && sherlock_alibi_status == 0)
                 {
-                    printf(" - alibi\n");
-                    sherlock_alibi_status = 1;
-                    alibi(head , turn);
-                    printmap(h);
+                    f = 0;
                 }
             }
         } while (f == 0);
@@ -2954,7 +2984,7 @@ struct tile* exchange_solo(struct tile* head)
     char sus1[3] , sus2[3];
     int cc1 , cc2 , k1 = 0, k2 = 0;
     do{
-         cc1 = rand()%(9) + 1;
+        cc1 = rand()%(9) + 1;
         do {
             cc2 = rand()%(9) + 1;
         } while (cc1 == cc2);
@@ -3014,15 +3044,20 @@ void rotation_solo(struct tile* head)
 {
     char rotate_character[3];
     struct tile *s;
-    int c , d;
+    int c , d , f;
     do {
         c = rand()%(9) + 1;
         for (s = head ; s->number != c ; s = s->next)
         {
             strcpy(rotate_character , s->tile_name);
+            if (s->status == 0)
+                f = 0;
+            else
+                f = 1;
+
         }
 
-    } while (s->status == 0);
+    } while (f == 0);
     int flag = 0;
     do {
         c = rand()%(4) + 1;
@@ -3149,10 +3184,11 @@ void film_map(struct tile *head)
         fprintf(film ,"\n");
     }
     fprintf(film ,"- - - - - - - - - - - - - - -\n");
+    fprintf(film , "*\n");
 }
 void play_film()
 {
-    film = fopen("film.txt" , "r+");
+    film = fopen("film.txt" , "r");
     if (film == NULL)
         printf("N");
     while (feof(film) == 0)
@@ -3160,73 +3196,47 @@ void play_film()
         int count = 0;
         char c;
         fscanf(film , "%c" , &c);
-        if(c=='\n')
-            count++;
         printf("%c", c);
+        if (c == '*')
+        {
+            //sleep(2);  //run in code blocks
+        }
+
 
 
 
     }
-//    fclose(film);
+    fclose(film);
 }
 void delay(int number_of_seconds)
 {
-    // Converting time into milli_seconds
     int milli_seconds = 1000 * number_of_seconds;
-
-    // Storing start time
     clock_t start_time = clock();
-
-    // looping till required time is not achieved
     while (clock() < start_time + milli_seconds);
 }
 void save_undo(struct tile *head)
 {
     struct tile *curr;
-    curr = head;
-    urow = curr->row;
-    ucolumn = curr ->column;
-    strcpy(utile_name , curr->tile_name);
-    uend = curr->end;
-    ustatus = curr->status;
-    uis_jack = curr->is_jack;
-    unumber = curr->number;
-    uhour = curr ->hour;
-    ualibi_status = curr->alibi_status;
-    udet_vision = curr->det_vision;
-    if(strcmpi(uToken , "rotation1") == 0)
-        rotation_joker_status = 0;
-    if(strcmpi(uToken , "rotation2") == 0)
-        rotation_exchange_status = 0;
-    if(strcmpi(uToken , "joker") == 0)
-        rotation_joker_status = 0;
-    if(strcmpi(uToken , "exchange") == 0)
-        rotation_exchange_status = 0;
-    if(strcmpi(uToken , "toby") == 1)
-        toby_watson_status = 0;
-    if(strcmpi(uToken , "watson") == 0)
-        toby_watson_status = 0;
-    if(strcmpi(uToken , "alibi") == 0)
-        sherlock_alibi_status = 0;
-    if(strcmpi(uToken , "sherlock") == 0)
-        sherlock_alibi_status = 0;
+    urotation_exchange_status = 0;
+    urotation_joker_status = 0;
+    usherlock_alibi_status = 0;
+    utoby_watson_status = 0;
 }
+
 void load_undo(struct tile *head)
 {
     Sherlock = uSherlock ;
     Toby = uToby;
     Watson = uWatson;
     struct tile *curr;
-//    curr->row = urow;
-//    curr ->column = ucolumn;
-//    strcpy( curr->tile_name ,utile_name);
-//    curr->end = uend ;
-//    curr->status = ustatus;
-//    curr->is_jack = uis_jack;
-//    curr->number = unumber;
-//    curr ->hour = uhour;
-//    curr->alibi_status = ualibi_status;
-//    curr->det_vision = udet_vision;
+    if((strcmpi(uToken , "rotation1") == 0) || (strcmpi(uToken , "joker" )== 0))
+        rotation_joker_status = frotation_joker_status;
+    if((strcmpi(uToken , "rotation2") == 0) || (strcmpi(uToken , "exchange") == 0))
+        rotation_exchange_status = frotation_exchange_status;
+    if((strcmpi(uToken , "toby") == 0) || (strcmpi(uToken , "watson") == 0))
+        toby_watson_status = ftoby_watson_status;
+    if((strcmpi(uToken , "alibi") == 0) || (strcmpi(uToken , "sherlock") == 0))
+        sherlock_alibi_status = fsherlock_alibi_status;
     if (strcmpi(uToken , "exchange") == 0)
     {
         struct tile* current1;
@@ -3242,16 +3252,13 @@ void load_undo(struct tile *head)
         r2 = current2 ->row;
         e1 = current1->end;
         e2 = current2->end;
-//    printf("r1 = %d . c1 = %d , sus1 = %s , r2 = %d . c2 = %d , sus2 = %s \n" , r1 , c1 , sus1 , r2 , c2 , sus2);
         int flag = 0;
         for (new = head; new->next != NULL; new = new->next) {
             if( strcmpi(new->tile_name, uexchange1) == 0 && flag == 0) {
                 new->row = r2;
                 new->column = c2;
                 new ->end = e1;
-//            strcpy(new->tile_name, sus2);
                 flag = 1;
-//            printf("name = %s , row = %d , col = %d , end = %d\n" , new->tile_name , new ->row , new->column , new->end);
             }
         }
         for (new = head; new->next != NULL; new = new->next)
@@ -3259,9 +3266,7 @@ void load_undo(struct tile *head)
             if(strcmpi(new->tile_name, uexchange2) == 0 && flag == 1) {
                 new->row = r1;
                 new->column = c1;
-                new ->end = e2;
-//            strcpy(new->tile_name, sus1);
-//            printf("*name = %s , row = %d , col = %d , end = %d\n" , new->tile_name , new ->row , new->column , new->end);
+                new->end = e2;
             }
         }
     }
@@ -3273,7 +3278,7 @@ void load_undo(struct tile *head)
     if (strcmpi(uToken , "alibi") == 0)
     {
         hourglass = uhour;
-        for (curr = head ; strcmpi(ualibi , curr->tile_name) != 0 ; curr = curr->next);
+        for (curr = head ; curr != NULL && strcmpi(ualibi , curr->tile_name) != 0 ; curr = curr->next);
         curr->alibi_status = ualibi_status;
     }
     printmap(head);

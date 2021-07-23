@@ -4,7 +4,7 @@ first
 joker
 exchange
 toby
-sherlock
+alibi
 8
 5
 1
@@ -84,7 +84,7 @@ test
 joker
 exchange
 watson
-sherlock
+alibi
 10
 9
 1
@@ -117,4 +117,125 @@ WG 3 0 2 3 5 1 1 0 0
 MA 2 1 3 1 6 2 0 1 0
 MS 3 0 3 2 7 1 1 0 0
 JP 4 1 3 3 8 1 0 1 1
+*
+hi
+1
+1
+rotation1
+exchange
+toby
+alibi
+10
+5
+4
+JP 4 1 1 1 0 1 0 0 1
+JB 2 1 1 2 2 1 1 0 0
+MS 1 0 1 3 1 1 1 0 0
+MA 3 0 2 1 3 2 0 0 0
+WG 4 1 2 2 4 1 1 0 0
+SG 2 1 2 3 5 0 1 0 0
+JS 2 0 3 1 6 1 1 0 0
+IL 3 1 3 2 7 0 1 0 0
+JL 1 1 3 3 8 1 1 0 0
+*
+first
+3
+1
+joker
+exchange
+toby
+alibi
+4
+7
+2
+SG 1 1 1 1 3 0 0 1 0
+MA 4 0 1 2 1 2 1 1 0
+JB 2 0 1 3 2 1 1 0 0
+IL 4 0 2 1 0 0 1 0 0
+JP 4 1 2 2 6 1 0 1 1
+MS 4 0 2 3 5 1 1 1 0
+WG 1 0 3 1 4 1 1 0 0
+JL 3 0 3 2 7 1 1 1 0
+JS 1 0 3 3 8 1 1 0 0
+*
+
+1
+1
+1
+joker
+rotation2
+watson
+alibi
+10
+7
+4
+SG 4 1 1 1 0 0 0 0 1
+MA 2 1 1 2 1 2 1 0 0
+IL 2 1 1 3 2 0 1 0 0
+MS 2 0 2 1 3 1 0 0 0
+JL 3 0 2 2 4 1 1 0 0
+JS 3 0 2 3 5 1 1 0 0
+JB 3 1 3 1 6 1 1 0 0
+WG 1 1 3 2 7 1 1 0 0
+JP 3 1 3 3 8 1 1 0 0
+*
+d
+1
+1
+rotation1
+rotation2
+toby
+sherlock
+10
+5
+1
+JP 4 0 1 1 0 1 1 0 0
+JB 3 1 1 2 1 1 1 0 0
+SG 2 1 1 3 2 0 1 0 0
+JS 4 0 2 1 3 1 1 0 0
+IL 1 1 2 2 4 0 1 0 0
+JL 2 1 2 3 5 1 1 0 0
+WG 2 0 3 1 6 1 1 0 0
+MA 3 1 3 2 7 2 1 0 0
+MS 4 1 3 3 8 1 0 0 1
+*
+hiiii
+1
+1
+rotation1
+exchange
+watson
+alibi
+11
+7
+4
+IL 4 1 1 1 0 0 1 0 0
+SG 1 1 1 2 4 0 1 0 0
+JL 2 0 1 3 2 1 0 0 0
+WG 2 1 2 1 3 1 1 0 0
+MA 3 0 2 2 1 2 1 0 0
+JS 3 0 2 3 5 1 1 0 0
+JB 1 1 3 1 6 1 0 0 1
+JP 1 0 3 2 7 1 1 0 0
+MS 3 1 3 3 8 1 1 0 0
+*
+hiiii
+2
+1
+joker
+rotation2
+toby
+sherlock
+8
+7
+1
+IL 4 1 1 1 0 0 1 1 0
+SG 1 0 1 2 4 0 1 0 0
+JL 2 0 1 3 2 1 0 0 0
+WG 2 1 2 1 3 1 1 1 0
+MA 3 0 2 2 1 2 1 1 0
+JS 3 0 2 3 5 1 1 1 0
+JB 1 1 3 1 6 1 0 1 1
+JP 1 0 3 2 7 1 1 1 0
+MS 1 1 3 3 8 1 1 1 0
 *
