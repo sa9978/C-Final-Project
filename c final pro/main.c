@@ -2,7 +2,8 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
-
+#include <conio.h>
+#include <windows.h>
 //#include <unistd.h>
 // ** *1 *2 *3 **
 // *4 11 12 13 *5
@@ -28,6 +29,29 @@ struct tile{
     int alibi_status; //shows that the card can be in alibi token1 or not0
     int det_vision; //1 shows that det.s maybe see him
 };
+typedef enum
+{
+    BLACK = 0, BLUE = 1, GREEN = 2,
+    AQUA = 3, RED = 4, PURPLE = 5,
+    YELLOW = 6, WHITE = 7, GRAY = 8,
+    LIGHT_BLUE = 9, LIGHT_GREEN = 10,
+    LIGHT_AQUA = 11, LIGHT_RED = 12,
+    LIGHT_PURPLE = 13, LIGHT_YELLOW = 14,
+    LIGHT_WHITE = 15
+} ConsoleColors;
+typedef HANDLE Handle;
+typedef CONSOLE_SCREEN_BUFFER_INFO BufferInfo;
+typedef WORD Word;
+short setTextColor(const ConsoleColors foreground)
+{
+    Handle consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    BufferInfo bufferInfo;
+    if(!GetConsoleScreenBufferInfo(consoleHandle, &bufferInfo))
+    return 0;
+    Word color = (bufferInfo.wAttributes & 0xF0) + (foreground & 0x0F);
+    SetConsoleTextAttribute(consoleHandle, color);
+    return 1;
+}
 int save_ch = 0;
 int urow;
 int ucolumn;
@@ -424,14 +448,17 @@ void printmap(struct tile *head) {
                 else {
                     int f = 0;
                     if (Toby == margin_count) {
+                        setTextColor(LIGHT_BLUE);
                         printf("T");
                         f = 1;
                     }
                     if (Sherlock == margin_count) {
+                        setTextColor(LIGHT_BLUE);
                         printf("S");
                         f = 1;
                     }
                     if (Watson == margin_count) {
+                        setTextColor(LIGHT_BLUE);
                         printf("W");
                         f = 1;
                     }
@@ -448,23 +475,49 @@ void printmap(struct tile *head) {
                     if ((current->row == i) && (current->column == j)) {
                         if (current->status == 1) {
                             if (current->end == up)
+                            {
+                                setTextColor(BLUE);
                                 printf("^,%s\t", current->tile_name);
+                            }
                             if (current->end == down)
+                            {
+                                setTextColor(BLUE);
                                 printf("v,%s\t", current->tile_name);
+                            }
+
                             if (current->end == right)
+                            {
+                                setTextColor(BLUE);
                                 printf("%s,>\t", current->tile_name);
+                            }
                             if (current->end == left)
+                            {
+                                setTextColor(BLUE);
                                 printf("<,%s\t", current->tile_name);
+                            }
                         }
                         if (current->status == 0) {
                             if (current->end == up)
+                            {
+                                setTextColor(BLUE);
                                 printf("^,--\t");
+                            }
                             if (current->end == down)
+                            {
+                                setTextColor(BLUE);
                                 printf("v,--\t");
+                            }
+
                             if (current->end == right)
+                            {
+                                setTextColor(BLUE);
                                 printf("--,>\t");
+                            }
                             if (current->end == left)
+                            {
+                                setTextColor(BLUE);
                                 printf("<,--\t");
+                            }
 //                    current = current->next;
                         }
                     }
